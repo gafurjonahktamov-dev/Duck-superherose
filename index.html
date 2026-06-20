@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Мир Монстров: Пошаговая Тактика</title>
+    <title>Мир Монстров: 50 Уровней</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -70,13 +70,11 @@
             box-shadow: none;
         }
 
-        /* Стили аватарок и редкостей */
         .rare { color: #54a0ff; font-weight: bold; }
         .super-rare { color: #5f27cd; font-weight: bold; }
         .epic { color: #ff00ff; font-weight: bold; }
         .legendary { color: #f1c40f; font-weight: bold; }
 
-        /* Внешний вид карточки монстра */
         .home-monster-card {
             background: #222f3e;
             border: 2px solid #3e3e4a;
@@ -101,13 +99,11 @@
             justify-content: center;
         }
         
-        /* Рамки аватарок по редкости */
         .b-rare { border-color: #54a0ff; }
         .b-super-rare { border-color: #5f27cd; }
         .b-epic { border-color: #ff00ff; }
         .b-legendary { border-color: #f1c40f; }
 
-        /* Капсулы */
         .capsule-item {
             background: #222f3e;
             border-radius: 10px;
@@ -123,18 +119,31 @@
         .capsule-item.c-epic { border-left-color: #ff00ff; }
         .capsule-item.c-legendary { border-left-color: #f1c40f; }
 
+        /* Оформление локаций на карте уровней */
+        .location-header {
+            background: #ff9f43;
+            color: #000;
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 15px 0 8px 0;
+            text-align: center;
+        }
+
         .level-block {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: #222f3e;
-            padding: 15px;
+            padding: 12px 15px;
             border-radius: 8px;
-            margin-bottom: 10px;
-            border-left: 5px solid #10ac84;
+            margin-bottom: 8px;
+            border-left: 5px solid #57606f;
         }
+        .level-block.unlocked { border-left-color: #10ac84; }
+        .level-block.locked { opacity: 0.5; }
 
-        /* Боевой экран */
         .battle-ui {
             background: #111;
             padding: 15px;
@@ -198,7 +207,6 @@
             text-align: left;
         }
 
-        /* Меню управления */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -239,7 +247,7 @@
         <div id="tab-home" class="tab-content">
             <div class="card" style="text-align: center; margin-bottom: 15px;">
                 <h2>🏠 Твой Дом</h2>
-                <p>Здесь живут твои монстры. Посмотри на их внешний вид и характеристики!</p>
+                <p>Здесь живут твои монстры. Твоя общая выживаемость на Уровнях зависит от количества прирученных бойцов!</p>
             </div>
             
             <div class="card">
@@ -251,24 +259,24 @@
         <div id="tab-shop" class="tab-content hidden">
             <div class="card">
                 <h2>🛒 Магазин Капсул</h2>
-                <p style="font-size: 13px; color: #aaa; margin-bottom: 20px;">Покупай капсулы разной редкости, чтобы собрать сильную команду!</p>
+                <p style="font-size: 13px; color: #aaa; margin-bottom: 20px;">Покупай капсулы, чтобы пополнить армию и одолеть боссов на поздних локациях!</p>
                 <div id="capsules-market"></div>
             </div>
         </div>
 
         <div id="tab-levels" class="tab-content hidden">
             <div class="card">
-                <h2>🗺️ Кампания: Уровни</h2>
-                <p>Выбирай уровень и управляй атаками своих монстров вручную!</p>
+                <h2>🗺️ Большая Карта: 50 Уровней</h2>
+                <p>Каждые 10 уровней меняется локация и босс. Пройди их все!</p>
                 
-                <div id="levels-list"></div>
+                <div id="levels-list" style="max-height: 400px; overflow-y: auto; padding-right: 5px;"></div>
 
-                <div id="level-battle-zone" class="hidden style-battle-wrapper">
+                <div id="level-battle-zone" class="hidden" style="margin-top: 15px;">
                     <div class="battle-ui">
                         <div class="battle-vs">
                             <div class="fighter-box">
-                                <div id="p-avatar" class="monster-avatar" style="margin: 0 auto;">?</div>
-                                <b id="p-name">Игрок</b>
+                                <div id="p-avatar" class="monster-avatar" style="margin: 0 auto;">🛡️</div>
+                                <b id="p-name">Твоя Армия</b>
                                 <div class="hp-bar-container"><div id="p-hp-bar" class="hp-bar"></div></div>
                                 <span id="p-hp-text">100/100</span>
                             </div>
@@ -281,7 +289,7 @@
                             </div>
                         </div>
 
-                        <p style="font-size: 14px; margin: 5px 0; color: #ff9f43;">Выбери, каким монстром ударить сейчас:</p>
+                        <p style="font-size: 14px; margin: 5px 0; color: #ff9f43;">Выбери атакующего монстра:</p>
                         <div id="battle-actions-container" class="action-buttons"></div>
 
                         <div id="level-battle-log" class="battle-log"></div>
@@ -294,7 +302,7 @@
         <div id="tab-battle" class="tab-content hidden">
             <div class="card" style="text-align: center;">
                 <h2>⚔️ Битва с Друзьями</h2>
-                <p>Режим дуэли временно перестраивается под новую пошаговую систему управления кнопками! Проходи пока уровни.</p>
+                <p>Режим дуэлей закрыт. Все твои силы нужны на прохождение 50 уровней кампании!</p>
             </div>
         </div>
 
@@ -308,15 +316,14 @@
     </div>
 
     <script>
-        // БАЗА ДАННЫХ МОНСТРОВ С АВАТАРКАМИ
         const monsterDatabase = {
-            slime:    { name: 'Болотный Слизень', rarity: 'rare', hp: 90, dmg: 14, def: 3, avatar: '🟢' },
-            goblin:   { name: 'Гоблин-Вор',       rarity: 'rare', hp: 80, dmg: 18, def: 2, avatar: '👺' },
-            dragon:   { name: 'Огненный Дракон',  rarity: 'super-rare', hp: 120, dmg: 25, def: 5, avatar: '🐉' },
-            wizard:   { name: 'Ледяной Маг',      rarity: 'super-rare', hp: 110, dmg: 22, def: 4, avatar: '🧙‍♂️' },
-            golem:    { name: 'Каменный Голем',   rarity: 'epic', hp: 200, dmg: 15, def: 18, avatar: '🗿' },
-            pekka:    { name: 'Стальной Рыцарь',  rarity: 'epic', hp: 160, dmg: 35, def: 10, avatar: '🤖' },
-            phoenix:  { name: 'Золотой Феникс',   rarity: 'legendary', hp: 250, dmg: 40, def: 15, avatar: '🦅' }
+            slime:    { name: 'Болотный Слизень', rarity: 'rare', hp: 90, dmg: 14, avatar: '🟢' },
+            goblin:   { name: 'Гоблин-Вор',       rarity: 'rare', hp: 80, dmg: 18, avatar: '👺' },
+            dragon:   { name: 'Огненный Дракон',  rarity: 'super-rare', hp: 120, dmg: 25, avatar: '🐉' },
+            wizard:   { name: 'Ледяной Маг',      rarity: 'super-rare', hp: 110, dmg: 22, avatar: '🧙‍♂️' },
+            golem:    { name: 'Каменный Голем',   rarity: 'epic', hp: 200, dmg: 15, avatar: '🗿' },
+            pekka:    { name: 'Стальной Рыцарь',  rarity: 'epic', hp: 160, dmg: 35, avatar: '🤖' },
+            phoenix:  { name: 'Золотой Феникс',   rarity: 'legendary', hp: 250, dmg: 45, avatar: '🦅' }
         };
 
         const capsulesConfig = [
@@ -326,22 +333,25 @@
             { id: 'legendary', name: 'ЛЕГЕНДАРНАЯ Капсула', price: 350, cssClass: 'c-legendary', textClass: 'legendary', contains: ['phoenix'] }
         ];
 
-        const npcLevels = [
-            { id: 1, name: 'Дикий Кентавр', hp: 90, dmg: 14, avatar: '🐴', reward: 60 },
-            { id: 2, name: 'Грозовой Огр', hp: 160, dmg: 24, avatar: '👹', reward: 120 },
-            { id: 3, name: 'Лорд Преисподней', hp: 300, dmg: 40, avatar: '💀', reward: 300 }
+        // Конфигурация локаций (5 локаций по 10 уровней)
+        const locations = [
+            { name: '🌲 Локация 1: Зеленый Лес', minLvl: 1, maxLvl: 10, bossName: 'Дикий Кентавр', bossAvatar: '🐴' },
+            { name: '🌋 Локация 2: Огненная Гора', minLvl: 11, maxLvl: 20, bossName: 'Адский Цербер', bossAvatar: '🐕' },
+            { name: '❄️ Локация 3: Ледяная Пещера', minLvl: 21, maxLvl: 30, bossName: 'Снежный Йети', bossAvatar: '🦍' },
+            { name: '⚡ Локация 4: Грозовой Пик', minLvl: 31, maxLvl: 40, bossName: 'Грозовой Титан', bossAvatar: '⚡' },
+            { name: '💀 Локация 5: Цитадель Тьмы', minLvl: 41, maxLvl: 50, bossName: 'Лорд Преисподней', bossAvatar: '👑' }
         ];
 
         let gameState = {
             coins: 100,
-            ownedIds: []
+            ownedIds: [],
+            currentLevel: 1 // Текущий открытый уровень (от 1 до 50)
         };
 
-        // Переменные текущего активного боя
         let activeBattle = null;
 
         function loadGame() {
-            const savedData = localStorage.getItem('clash_monsters_tactical_v5');
+            const savedData = localStorage.getItem('monster_rpg_50_levels');
             if (savedData) {
                 gameState = JSON.parse(savedData);
             }
@@ -350,12 +360,11 @@
         }
 
         function saveGame() {
-            localStorage.setItem('clash_monsters_tactical_v5', JSON.stringify(gameState));
+            localStorage.setItem('monster_rpg_50_levels', JSON.stringify(gameState));
         }
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            
             if (tabName === 'home') document.getElementById('tab-home').classList.remove('hidden');
             if (tabName === 'shop') document.getElementById('tab-shop').classList.remove('hidden');
             if (tabName === 'levels') {
@@ -387,7 +396,6 @@
             const config = capsulesConfig.find(c => c.id === capsuleId);
             if (gameState.coins >= config.price) {
                 gameState.coins -= config.price;
-                
                 const list = config.contains;
                 const randomId = list[Math.floor(Math.random() * list.length)];
                 const monster = monsterDatabase[randomId];
@@ -396,11 +404,11 @@
                     gameState.ownedIds.push(randomId);
                 }
 
-                alert(`✨ УСПЕХ! ✨\nИз капсулы появился:\n${monster.avatar} ${monster.name}!`);
+                alert(`✨ УСПЕХ! ✨\nИз капсулы получен:\n${monster.avatar} ${monster.name}!`);
                 updateUI();
                 saveGame();
             } else {
-                alert('Не хватает монет! Побеждай врагов на вкладке "Уровни".');
+                alert('Не хватает монет! Проходи уровни кампании.');
             }
         }
 
@@ -409,7 +417,7 @@
 
             const homeList = document.getElementById('home-monsters-list');
             if (gameState.ownedIds.length === 0) {
-                homeList.innerHTML = "У тебя пока пусто. Купи капсулу в <b>Магазине</b>!";
+                homeList.innerHTML = "У тебя пусто. Открой первую капсулу в <b>Магазине</b>!";
             } else {
                 homeList.innerHTML = gameState.ownedIds.map(id => {
                     const m = monsterDatabase[id];
@@ -429,144 +437,135 @@
             }
         }
 
+        // ГЕНЕРАЦИЯ 50 УРОВНЕЙ С РАЗДЕЛЕНИЕМ ПО ЛОКАЦИЯМ
         function renderLevels() {
             const div = document.getElementById('levels-list');
             div.innerHTML = '';
             
-            // Если идет бой, скрываем список выбора уровней
             if (activeBattle) {
                 div.innerHTML = "<p style='color:#aaa; text-align:center;'>Идет сражение...</p>";
                 return;
             }
 
-            npcLevels.forEach(npc => {
-                const block = document.createElement('div');
-                block.className = 'level-block';
-                const canFight = gameState.ownedIds.length > 0;
-                
-                block.innerHTML = `
-                    <div>
-                        <b style="color:#10ac84;">Уровень ${npc.id}</b><br>
-                        <span>Босс: ${npc.avatar} <b>${npc.name}</b></span><br>
-                        <span style="font-size:12px; color:#f1c40f;">Награда: +${npc.reward} 🪙</span>
-                    </div>
-                    <button style="width:auto; padding:10px; font-size:14px; background:#10ac84; box-shadow:0 3px 0 #0f8f6d;" 
-                        onclick="initTacticalBattle(${npc.id})" ${!canFight ? 'disabled' : ''}>В Бой</button>
-                `;
-                div.appendChild(block);
+            locations.forEach(loc => {
+                // Создаем заголовок локации
+                const locHeader = document.createElement('div');
+                locHeader.className = 'location-header';
+                locHeader.innerText = loc.name;
+                div.appendChild(locHeader);
+
+                // Генерируем уровни, принадлежащие этой локации
+                for (let i = loc.minLvl; i <= loc.maxLvl; i++) {
+                    const block = document.createElement('div');
+                    const isUnlocked = (i <= gameState.currentLevel);
+                    
+                    block.className = `level-block ${isUnlocked ? 'unlocked' : 'locked'}`;
+                    
+                    // С каждым уровнем HP врага растет на 20, урон на 4, золото на 15
+                    let npcHp = 70 + (i * 20);
+                    let npcDmg = 10 + (i * 4);
+                    let reward = 40 + (i * 15);
+
+                    block.innerHTML = `
+                        <div>
+                            <b>Уровень ${i}</b> ${i % 10 === 0 ? '⭐ [БОСС]' : ''}<br>
+                            <span style="font-size:13px; color:#aaa;">Враг: ${loc.bossAvatar} ${loc.bossName} (❤️${npcHp})</span><br>
+                            <span style="font-size:12px; color:#f1c40f;">Награда: +${reward} 🪙</span>
+                        </div>
+                        <button style="width:auto; padding:8px 12px; font-size:13px; background:${isUnlocked ? '#10ac84' : '#57606f'}; box-shadow:none;" 
+                            onclick="initTacticalBattle(${i}, ${npcHp}, ${npcDmg}, ${reward}, '${loc.bossName}', '${loc.bossAvatar}')" 
+                            ${(!isUnlocked || gameState.ownedIds.length === 0) ? 'disabled' : ''}>${isUnlocked ? 'В Бой' : '🔒'}</button>
+                    `;
+                    div.appendChild(block);
+                }
             });
         }
 
-        // ИНИЦИАЛИЗАЦИЯ ПОШАГОВОГО БОЯ
-        function initTacticalBattle(levelId) {
-            if (gameState.ownedIds.length === 0) return;
-            
-            const npc = npcLevels.find(n => n.id === levelId);
-            
-            // Считаем общее HP игрока как сумму здоровья всех его открытых монстров
+        function initTacticalBattle(lvl, hp, dmg, reward, name, avatar) {
             let totalPlayerHp = 0;
-            gameState.ownedIds.forEach(id => {
-                totalPlayerHp += monsterDatabase[id].hp;
-            });
+            gameState.ownedIds.forEach(id => { totalPlayerHp += monsterDatabase[id].hp; });
 
             activeBattle = {
-                npc: { ...npc, maxHp: npc.hp },
+                levelNum: lvl,
+                npc: { name: `${name} (Lvl ${lvl})`, avatar: avatar, hp: hp, maxHp: hp, dmg: dmg },
                 player: { hp: totalPlayerHp, maxHp: totalPlayerHp },
-                reward: npc.reward
+                reward: reward
             };
 
-            // Обновляем визуал боевого экрана
-            document.getElementById('p-name').innerText = "Твоя Команда";
-            document.getElementById('p-avatar').innerText = "🛡️";
             document.getElementById('p-hp-text').innerText = `${totalPlayerHp}/${totalPlayerHp}`;
             document.getElementById('p-hp-bar').style.width = "100%";
 
-            document.getElementById('e-name').innerText = npc.name;
-            document.getElementById('e-avatar').innerText = npc.avatar;
-            document.getElementById('e-hp-text').innerText = `${npc.hp}/${npc.hp}`;
+            document.getElementById('e-name').innerText = activeBattle.npc.name;
+            document.getElementById('e-avatar').innerText = activeBattle.npc.avatar;
+            document.getElementById('e-hp-text').innerText = `${hp}/${hp}`;
             document.getElementById('e-hp-bar').style.width = "100%";
 
-            const log = document.getElementById('level-battle-log');
-            log.innerHTML = `⚔️ Начинается ручной бой против <b>${npc.name}</b>!<br>Выбирай монстров на кнопках ниже для нанесения ударов.<br><br>`;
-
-            // Показываем боевой интерфейс
+            document.getElementById('level-battle-log').innerHTML = `⚔️ Начат пошаговый бой на <b>Уровне ${lvl}</b>!<br>Жми на карточки монстров снизу, чтобы атаковать.<br><br>`;
             document.getElementById('level-battle-zone').classList.remove('hidden');
             
             renderActionButtons();
-            renderLevels(); // Перерендерить список, чтобы скрыть кнопку входа
+            renderLevels();
         }
 
-        // ГЕНЕРАЦИЯ КНОПОК ДЛЯ УДАРОВ КАЖДОГО МОНСТРА
         function renderActionButtons() {
             const btnContainer = document.getElementById('battle-actions-container');
             btnContainer.innerHTML = '';
-
             gameState.ownedIds.forEach(id => {
                 const monster = monsterDatabase[id];
                 const btn = document.createElement('button');
                 btn.className = 'action-btn';
-                btn.innerHTML = `${monster.avatar} Удар (${monster.dmg} DMG)`;
+                btn.innerHTML = `${monster.avatar} ${monster.name}<br>(${monster.dmg} DMG)`;
                 btn.onclick = () => handlePlayerTurn(id);
                 btnContainer.appendChild(btn);
             });
         }
 
-        // ОБРАБОТКА ХОДА ИГРОКА КЛИКОМ ПО КНОПКЕ
         function handlePlayerTurn(monsterId) {
             if (!activeBattle) return;
-
             const monster = monsterDatabase[monsterId];
             const log = document.getElementById('level-battle-log');
 
-            // 1. ТВОЙ УДАР
-            let damageToEnemy = monster.dmg;
-            activeBattle.npc.hp -= damageToEnemy;
+            // Ход игрока
+            activeBattle.npc.hp -= monster.dmg;
             if (activeBattle.npc.hp < 0) activeBattle.npc.hp = 0;
 
-            // Обновляем шкалу врага
-            let enemyHpPercent = (activeBattle.npc.hp / activeBattle.npc.maxHp) * 100;
-            document.getElementById('e-hp-bar').style.width = enemyHpPercent + "%";
+            document.getElementById('e-hp-bar').style.width = ((activeBattle.npc.hp / activeBattle.npc.maxHp) * 100) + "%";
             document.getElementById('e-hp-text').innerText = `${activeBattle.npc.hp}/${activeBattle.npc.maxHp}`;
-            
-            log.innerHTML += `💥 <b>${monster.name}</b> атакует и наносит <b>${damageToEnemy}</b> урона!<br>`;
+            log.innerHTML += `💥 <b>${monster.name}</b> нанес <b>${monster.dmg}</b> урона!<br>`;
 
-            // Проверка на победу
             if (activeBattle.npc.hp <= 0) {
-                log.innerHTML += `<br>🏆 <b>ПОБЕДА!</b> Босс повержен!<br>💰 Награда за управление: <b>+${activeBattle.reward} монет</b>.<br>`;
+                log.innerHTML += `<br>🏆 <b>УРОВЕНЬ ПРОЙДЕН!</b><br>💰 Получено: <b>+${activeBattle.reward} монет</b>!<br>`;
                 gameState.coins += activeBattle.reward;
+                
+                // Открываем следующий уровень, если прошли текущий максимальный
+                if (activeBattle.levelNum === gameState.currentLevel && gameState.currentLevel < 50) {
+                    gameState.currentLevel++;
+                    log.innerHTML += `🔓 Открыт доступ к <b>Уровню ${gameState.currentLevel}</b>!<br>`;
+                }
                 endBattle();
                 return;
             }
 
-            // 2. ОТВЕТНЫЙ ХОД ВРАГА (АВТОМАТИЧЕСКИ)
-            let damageToPlayer = activeBattle.npc.dmg;
-            activeBattle.player.hp -= damageToPlayer;
+            // Ход компьютера
+            activeBattle.player.hp -= activeBattle.npc.dmg;
             if (activeBattle.player.hp < 0) activeBattle.player.hp = 0;
 
-            // Обновляем шкалу игрока
-            let playerHpPercent = (activeBattle.player.hp / activeBattle.player.maxHp) * 100;
-            document.getElementById('p-hp-bar').style.width = playerHpPercent + "%";
+            document.getElementById('p-hp-bar').style.width = ((activeBattle.player.hp / activeBattle.player.maxHp) * 100) + "%";
             document.getElementById('p-hp-text').innerText = `${activeBattle.player.hp}/${activeBattle.player.maxHp}`;
+            log.innerHTML += `🥊 Враг бьет в ответ и наносит всей твоей банде <b>${activeBattle.npc.dmg}</b> урона.<br><br>`;
 
-            log.innerHTML += `🥊 <b>${activeBattle.npc.name}</b> бьет в ответ и наносит всей команде <b>${damageToPlayer}</b> урона.<br><br>`;
-
-            // Проверка на поражение
             if (activeBattle.player.hp <= 0) {
-                log.innerHTML += `<br>💀 <b>ПОРАЖЕНИЕ!</b> Твои монстры выбились из сил. Накопи золото и открой капсулы мощнее.<br>`;
+                log.innerHTML += `<br>💀 <b>ПОРАЖЕНИЕ!</b> Твоя команда пала. Открой капсулы в магазине, чтобы увеличить общее здоровье команды.<br>`;
                 endBattle();
                 return;
             }
-
             log.scrollTop = log.scrollHeight;
         }
 
-        // ЗАВЕРШЕНИЕ И ОЧИСТКА ПОЛЕЙ БОЯ
         function endBattle() {
             activeBattle = null;
             saveGame();
             updateUI();
-            
-            // Через 4 секунды прячем боевой экран и возвращаем карту уровней
             setTimeout(() => {
                 document.getElementById('level-battle-zone').classList.add('hidden');
                 renderLevels();
