@@ -129,24 +129,40 @@
         .level-badge.unlocked { background: #00d2d3; color: black; }
         .level-badge.locked { opacity: 0.3; cursor: not-allowed; }
 
-        /* ПОЛЕ БОЯ */
+        /* ЖИВОЕ ПОЛЕ БОЯ С ДЕКОРАЦИЯМИ */
         .battle-field {
-            background: linear-gradient(180deg, #10141d 0%, #2c3e50 100%);
             border-radius: 16px; height: 240px; position: relative;
             overflow: hidden; border: 3px solid #ffbc00; display: flex;
             justify-content: space-between; padding: 15px; box-sizing: border-box; align-items: center;
+            transition: background 0.5s;
         }
-        .field-side { display: flex; flex-direction: column; gap: 12px; justify-content: center; width: 38%; }
+        
+        /* Слой заднего декора (трава, облака, искры) */
+        .field-decor {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; display: flex; wrap: wrap; justify-content: space-around;
+            align-content: space-around; opacity: 0.35; font-size: 24px; z-index: 1;
+        }
+
+        /* Анимация плавного парения элементов декора */
+        @keyframes floatingDecor {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .decor-item { animation: floatingDecor 4s ease-in-out infinite; }
+
+        .field-side { display: flex; flex-direction: column; gap: 12px; justify-content: center; width: 38%; z-index: 5; }
         .field-unit { display: flex; flex-direction: column; align-items: center; position: relative; cursor: pointer; }
         .field-unit.active-choice { transform: scale(1.15); filter: drop-shadow(0 0 10px #ffbc00); }
         .field-unit.dead { opacity: 0.15; filter: grayscale(1); pointer-events: none; }
         .field-avatar { font-size: 40px; }
-        .field-name { font-size: 10px; color: #ccc; margin-top: 2px; text-align: center; }
-        .field-hp-bar-bg { background: #444; width: 60px; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+        .field-name { font-size: 10px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px #000; margin-top: 2px; text-align: center; }
+        .field-hp-bar-bg { background: #444; width: 60px; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.8); }
         .field-hp-bar { background: #10ac84; height: 100%; width: 100%; }
         .field-unit.enemy .field-hp-bar { background: #ff4757; }
 
-        .damage-pop { position: absolute; color: #ff4757; font-weight: bold; font-size: 22px; animation: popUp 0.8s forwards; }
+        .damage-pop { position: absolute; color: #ff4757; font-weight: bold; font-size: 26px; text-shadow: 2px 2px 0px #000; z-index: 10; animation: popUp 0.8s forwards; }
         @keyframes popUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-30px); } }
 
         /* ОКНА И ВЫБОР СТОРОНЫ */
@@ -221,19 +237,22 @@
 
         <div id="tab-levels" class="tab-content hidden">
             <div id="levels-selection-card" class="card">
-                <h2>🗺️ Боевые Поля (50 Уровней)</h2>
+                <h2>🗺️ Выбор локации (50 Уровней)</h2>
                 <div id="levels-badge-container" class="level-badge-grid"></div>
             </div>
 
             <div id="battle-field-card" class="card hidden">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                     <span id="turn-indicator" style="font-weight:bold; color:#ffbc00;">Загрузка...</span>
-                    <span id="location-title" style="font-size:12px; color:#aaa;">Сектор</span>
+                    <span id="location-title" style="font-size:12px; color:#aaa; font-weight:bold;">Локация</span>
                 </div>
+                
                 <div id="battle-arena" class="battle-field">
+                    <div id="battle-decor-layer" class="field-decor"></div>
                     <div id="player-side" class="field-side"></div>
                     <div id="enemy-side" class="field-side"></div>
                 </div>
+                
                 <div id="skills-control" class="skills-panel hidden">
                     <span id="selected-hero-name" style="font-size:13px; font-weight:bold; color:#ffbc00;">Удар:</span>
                     <div id="skills-buttons" class="skills-grid"></div>
@@ -280,7 +299,7 @@
     <div class="bottom-nav">
         <button class="nav-btn" style="background-color: #ffbc00; color: black;" onclick="switchTab('home')">Штаб</button>
         <button class="nav-btn" onclick="switchTab('shop')">Магазин</button>
-        <button class="nav-btn" onclick="switchTab('levels')">Арена</button>
+        <button class="nav-btn" onclick="switchTab('levels')">Локации</button>
         <button class="nav-btn" onclick="switchTab('friends')">Друзья</button>
     </div>
 
@@ -309,6 +328,35 @@
             chocolate: { n: 'Шоколадка',emoji: '🍫', xp: 200, price: 190 }
         };
 
+        // НАСТРОЙКИ БИОМОВ ДЛЯ ЛОКАЦИЙ
+        const locationBiomes = {
+            forest: {
+                name: "Дикий утиный лес",
+                bg: "linear-gradient(180deg, #1e3c16 0%, #3a602a 100%)",
+                decor: ["🌲", "🌳", "🐦", "🍃", "🍄", "🌱"]
+            },
+            cave: {
+                name: "Заброшенные пещеры",
+                bg: "linear-gradient(180deg, #111116 0%, #2c2d35 100%)",
+                decor: ["🦇", "🦨", "🪨", "🕸️", "💎", "🦴"]
+            },
+            neonCity: {
+                name: "Кибер-Неоновый Город",
+                bg: "linear-gradient(180deg, #09091e 0%, #1a0826 100%)",
+                decor: ["🏙️", "⚡", "🤖", "🚨", "🔋", "🥏"]
+            },
+            lava: {
+                name: "Лавовое ущелье",
+                bg: "linear-gradient(180deg, #2d0b00 0%, #571700 100%)",
+                decor: ["🌋", "🔥", "☄️", "💥", "💨", "🖤"]
+            },
+            space: {
+                name: "Космическая Цитадель",
+                bg: "linear-gradient(180deg, #020208 0%, #0d1b2a 100%)",
+                decor: ["🌌", "🪐", "✨", "🛸", "☄️", "🌟"]
+            }
+        };
+
         let gameState = {
             fraction: null,
             coins: 150,
@@ -327,7 +375,6 @@
             return gameState.fraction === 'villains' ? villainsDatabase : heroesDatabase;
         }
 
-        // Продвинутое чтение памяти (пытается достать даже из Cookie)
         function getSavedData() {
             let local = localStorage.getItem('super_ducks_fraction_v2');
             if (local) return local;
@@ -347,7 +394,6 @@
                 try { gameState = JSON.parse(saved); } catch(e) {}
             }
             
-            // Если ID нет, создаем намертво привязанный к миллисекундам
             if (!gameState.myId) {
                 gameState.myId = 'ID-' + Math.floor(1000 + Math.random() * 9000);
             }
@@ -380,7 +426,6 @@
             let enteredId = document.getElementById('restore-id-input').value.trim();
             if (!enteredId.startsWith('ID-')) { alert('Неверный формат ID!'); return; }
             gameState.myId = enteredId;
-            // Восстанавливаем дефолтную фракцию героев, чтобы игра не зависала
             chooseFraction('heroes');
         }
 
@@ -399,9 +444,7 @@
 
         function saveGame() {
             let strData = JSON.stringify(gameState);
-            // Сохраняем в localStorage
             localStorage.setItem('super_ducks_fraction_v2', strData);
-            // Резервное сохранение в Cookies (на 365 дней)
             let d = new Date();
             d.setTime(d.getTime() + (365*24*60*60*1000));
             document.cookie = "ducks_save=" + strData + ";expires="+ d.toUTCString() + ";path=/";
@@ -582,7 +625,7 @@
             if (gameState.inventory.length <= 1) { alert('Нельзя ликвидировать последнюю утку!'); return; }
             gameState.coins += price;
             gameState.inventory = gameState.inventory.filter(i => i.uid !== uid);
-            gameState.teamUids = gameState.teamUids.filter(tUid => tUid !== uid);
+            gameState.teamUids = gameState.teamUids.filter(tUid => tUid !== targetUid);
             closeModal(); updateUI(); saveGame();
         }
 
@@ -597,11 +640,45 @@
             }
         }
 
+        // ОПРЕДЕЛЕНИЕ И ГЕНЕРАЦИЯ ДЕКОРА БИОМА
+        function applyBiomeDecoration(lvl) {
+            let biome = locationBiomes.forest; // По умолчанию первый биом
+            
+            if (lvl > 10 && lvl <= 20) biome = locationBiomes.cave;
+            else if (lvl > 20 && lvl <= 30) biome = locationBiomes.neonCity;
+            else if (lvl > 30 && lvl <= 40) biome = locationBiomes.lava;
+            else if (lvl > 40) biome = locationBiomes.space;
+
+            // Настройка названия локации и бэкграунда
+            document.getElementById('location-title').innerText = `${biome.name} (Этап ${lvl})`;
+            const arena = document.getElementById('battle-arena');
+            arena.style.background = biome.bg;
+
+            // Заполнение слоя декораций случайными объектами биома
+            const decorLayer = document.getElementById('battle-decor-layer');
+            decorLayer.innerHTML = '';
+            
+            // Генерируем 8 случайных элементов декора на поле
+            for(let i = 0; i < 8; i++) {
+                const randomEmoji = biome.decor[Math.floor(Math.random() * biome.decor.length)];
+                const span = document.createElement('span');
+                span.className = 'decor-item';
+                span.innerText = randomEmoji;
+                span.style.animationDelay = `${Math.random() * 2}s`;
+                span.style.fontSize = `${16 + Math.random() * 14}px`;
+                decorLayer.appendChild(span);
+            }
+        }
+
         function startBattleCore(mode, targetData) {
             if (gameState.teamUids.length === 0) { alert('Сформируй боевой отряд в Штабе!'); return; }
 
             document.getElementById('levels-selection-card').classList.add('hidden');
             document.getElementById('battle-field-card').classList.remove('hidden');
+
+            // Применяем декорации локации в зависимости от уровня
+            let currentLvlNum = mode === 'level' ? targetData : 1;
+            applyBiomeDecoration(currentLvlNum);
 
             const db = getActiveDb();
             let playerUnits = gameState.teamUids.map((uid) => {
@@ -615,7 +692,6 @@
             let enemyUnits = [];
             
             if (mode === 'level') {
-                document.getElementById('location-title').innerText = `Стычка: Этап ${targetData}`;
                 let enemyHp = 45 + (targetData * 11);
                 let enemyDmg = 5 + (targetData * 2);
                 
