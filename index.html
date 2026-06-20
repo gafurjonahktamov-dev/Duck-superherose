@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Моя Игра: Битвы Монстров</title>
+    <title>Мир Монстров: Кампания и Дуэли</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -27,6 +27,9 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             font-size: 20px;
             font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .container {
@@ -38,7 +41,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            padding-bottom: 100px;
+            padding-bottom: 110px;
         }
 
         .card {
@@ -48,7 +51,7 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
-        /* Крупные удобные кнопки для телефона */
+        /* Крупные кнопки для смартфонов */
         button {
             background-color: #ff9f43;
             color: white;
@@ -73,10 +76,24 @@
             box-shadow: 0 4px 0 #341f97;
         }
 
+        button.danger {
+            background-color: #ee5253;
+            box-shadow: 0 4px 0 #c82333;
+        }
+
         button:disabled {
             background-color: #57606f;
             box-shadow: 0 4px 0 #2f3542;
             cursor: not-allowed;
+        }
+
+        /* Витрина монстров в Доме */
+        .home-monster-card {
+            background: #1e1e24;
+            border: 2px solid #ff9f43;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
         }
 
         .monster-item {
@@ -92,7 +109,7 @@
         }
 
         .stats-text {
-            font-size: 12px;
+            font-size: 13px;
             color: #ffdd59;
         }
 
@@ -106,12 +123,24 @@
             font-size: 13px;
         }
 
-        /* Экран боя */
-        #battle-log {
+        /* Стили для выбора уровней */
+        .level-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #222f3e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 5px solid #10ac84;
+        }
+
+        /* Терминал боя */
+        .battle-log {
             background-color: #111;
             border-radius: 8px;
             padding: 10px;
-            height: 150px;
+            height: 180px;
             overflow-y: auto;
             font-family: monospace;
             font-size: 13px;
@@ -120,7 +149,7 @@
             text-align: left;
         }
 
-        /* Панель меню Clash Royale */
+        /* Панель навигации а-ля Clash Royale */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -131,7 +160,7 @@
             background-color: #2a2a32;
             display: flex;
             justify-content: space-around;
-            padding: 10px 0;
+            padding: 12px 0;
             box-shadow: 0 -4px 10px rgba(0,0,0,0.4);
             border-top: 2px solid #3e3e4a;
             z-index: 100;
@@ -140,6 +169,351 @@
         .nav-btn {
             background-color: #341f97;
             box-shadow: 0 3px 0 #1e1250;
-            padding: 12px;
-            font-size: 15px;
-            width: 28%;
+            padding: 10px;
+            font-size: 14px;
+            width: 22%;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        Монет: <span id="coins-display">100</span> 🪙
+    </header>
+
+    <div class="container">
+        
+        <div id="tab-home" class="tab-content">
+            <div class="card" style="text-align: center; margin-bottom: 15px;">
+                <h2>🏠 Твой Дом</h2>
+                <p>Здесь живут и тренируются твои карманные монстры.</p>
+                <button onclick="addCoins()" style="font-size: 15px; padding: 10px;">Собрать налог с территории (+1 🪙)</button>
+            </div>
+            
+            <div class="card">
+                <h3>Твоя активная команда:</h3>
+                <div id="home-monsters-list">Купите монстров в Магазине, чтобы они появились дома!</div>
+            </div>
+        </div>
+
+        <div id="tab-shop" class="tab-content hidden">
+            <div class="card">
+                <h2>🛒 Магазин персонажей</h2>
+                <p style="font-size: 12px; color: #aaa;">Цены и скидки обновляются при покупках!</p>
+                <div id="market-place"></div>
+                <br>
+                <button class="secondary" style="font-size:14px; padding:10px;" onclick="refreshDiscounts()">Обновить скидки</button>
+            </div>
+        </div>
+
+        <div id="tab-levels" class="tab-content hidden">
+            <div class="card">
+                <h2>🗺️ Кампания: Уровни</h2>
+                <p>Побеждай свирепых боссов и получай золото!</p>
+                
+                <label for="level-fighter-select">Выбери своего бойца:</label>
+                <select id="level-fighter-select" style="width:100%; padding:10px; margin:10px 0; border-radius:5px; font-size:16px; background:#1e1e24; color:white; border:1px solid #555;"></select>
+                
+                <div id="levels-list">
+                    </div>
+
+                <div id="level-battle-zone" class="hidden" style="margin-top: 15px;">
+                    <h3 style="color:#10ac84;">Лог Сражения на Уровне:</h3>
+                    <div id="level-battle-log" class="battle-log"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-battle" class="tab-content hidden">
+            <div class="card" style="text-align: center;">
+                <h2>⚔️ Битва с Друзьями </h2>
+                <p>Брось вызов случайному монстру из команды твоего друга!</p>
+                
+                <label for="fighter-select">Выбери своего бойца:</label>
+                <select id="fighter-select" style="width:100%; padding:10px; margin:10px 0; border-radius:5px; font-size:16px; background:#1e1e24; color:white; border:1px solid #555;"></select>
+                
+                <p style="font-size:14px; color:#ff9f43;">Друг ставит на кон: <strong id="battle-bet">50</strong> 🪙</p>
+                
+                <button id="start-battle-btn" onclick="startFriendFight()">Начать Дуэль!</button>
+                
+                <div id="battle-zone" class="hidden">
+                    <h3 style="color:#ff4757; margin-top:15px;">Ход Дуэли:</h3>
+                    <div id="battle-log" class="battle-log"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-btn" style="background-color: #ff9f43; box-shadow: 0 3px 0 #d35400;" onclick="switchTab('home')">Дом</button>
+        <button class="nav-btn" style="background-color: #a55eea; box-shadow: 0 3px 0 #8854d0;" onclick="switchTab('shop')">Магазин</button>
+        <button class="nav-btn" style="background-color: #10ac84; box-shadow: 0 3px 0 #0f8f6d;" onclick="switchTab('levels')">Уровни</button>
+        <button class="nav-btn" style="background-color: #ff4757; box-shadow: 0 3px 0 #ee5253;" onclick="switchTab('battle')">Друзья</button>
+    </div>
+
+    <script>
+        // Реестр монстров
+        const monsterDatabase = {
+            dragon: { name: 'Огненный Дракон', basePrice: 100, hp: 120, dmg: 25, def: 5, ability: 'Поджог (Шанс нанести +15 урона)' },
+            golem:  { name: 'Каменный Голем',  basePrice: 250, hp: 200, dmg: 12, def: 18, ability: 'Каменный Щит (Блокирует урон)' },
+            pekka:  { name: 'Стальной Рыцарь', basePrice: 500, hp: 160, dmg: 35, def: 10, ability: 'Оглушение (Критический удар x2)' }
+        };
+
+        // Статичные NPC для вкладки "Уровни"
+        const npcLevels = [
+            { id: 1, name: 'Слизень-Переросток', hp: 60, dmg: 10, def: 2, reward: 40 },
+            { id: 2, name: 'Лесной Огр', hp: 130, dmg: 18, def: 6, reward: 80 },
+            { id: 3, name: 'Король Скелетов', hp: 220, dmg: 28, def: 12, reward: 150 }
+        ];
+
+        let gameState = {
+            coins: 100,
+            ownedIds: []
+        };
+
+        let marketPrices = {};
+
+        function loadGame() {
+            const savedData = localStorage.getItem('clash_monsters_v3');
+            if (savedData) {
+                gameState = JSON.parse(savedData);
+            }
+            generateDiscounts();
+            updateUI();
+        }
+
+        function saveGame() {
+            localStorage.setItem('clash_monsters_v3', JSON.stringify(gameState));
+        }
+
+        function addCoins() {
+            gameState.coins += 1;
+            updateUI();
+            saveGame();
+        }
+
+        // Переключение ВСЕХ вкладок
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            if (tabName === 'home') document.getElementById('tab-home').classList.remove('hidden');
+            if (tabName === 'shop') document.getElementById('tab-shop').classList.remove('hidden');
+            if (tabName === 'levels') {
+                document.getElementById('tab-levels').classList.remove('hidden');
+                setupSelectComponent('level-fighter-select');
+                renderLevels();
+            }
+            if (tabName === 'battle') {
+                document.getElementById('tab-battle').classList.remove('hidden');
+                setupSelectComponent('fighter-select');
+                document.getElementById('battle-bet').innerText = Math.floor(Math.random() * 70) + 40;
+            }
+        }
+
+        function generateDiscounts() {
+            Object.keys(monsterDatabase).forEach(id => {
+                const monster = monsterDatabase[id];
+                const hasDiscount = Math.random() > 0.5;
+                let discountPercent = 0;
+                if (hasDiscount) discountPercent = Math.floor(Math.random() * 30) + 5;
+                
+                const finalPrice = Math.round(monster.basePrice * (1 - discountPercent / 100));
+                marketPrices[id] = { price: finalPrice, discount: discountPercent };
+            });
+        }
+
+        function refreshDiscounts() {
+            generateDiscounts();
+            updateUI();
+        }
+
+        function buyMonster(id) {
+            const currentPrice = marketPrices[id].price;
+            if (gameState.ownedIds.includes(id)) return;
+
+            if (gameState.coins >= currentPrice) {
+                gameState.coins -= currentPrice;
+                gameState.ownedIds.push(id);
+                alert(`Ты приручил монстра: ${monsterDatabase[id].name}! Ищи его во вкладке Дом.`);
+                generateDiscounts();
+                updateUI();
+                saveGame();
+            } else {
+                alert('Не хватает золота!');
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('coins-display').innerText = gameState.coins;
+
+            // Рендер вкладки ДОМ (карточки монстров)
+            const homeList = document.getElementById('home-monsters-list');
+            if (gameState.ownedIds.length === 0) {
+                homeList.innerHTML = "У вас пока пусто. Купите первого монстра во вкладке <b>Магазин</b>!";
+            } else {
+                homeList.innerHTML = gameState.ownedIds.map(id => {
+                    const m = monsterDatabase[id];
+                    return `
+                        <div class="home-monster-card">
+                            <strong>✨ ${m.name}</strong><br>
+                            <span class="stats-text">❤️ Здоровье: ${m.hp} | ⚔️ Атака: ${m.dmg} | 🛡️ Защита: ${m.def}</span><br>
+                            <i style="font-size:12px; color:#aaa;">Умение: ${m.ability}</i>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Рендер Магазина
+            const marketDiv = document.getElementById('market-place');
+            marketDiv.innerHTML = '';
+            Object.keys(monsterDatabase).forEach(id => {
+                const monster = monsterDatabase[id];
+                const info = marketPrices[id];
+                const isOwned = gameState.ownedIds.includes(id);
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'monster-item';
+                let discountText = info.discount > 0 ? `<span class="discount">(-${info.discount}%)</span>` : '';
+
+                itemDiv.innerHTML = `
+                    <div>
+                        <strong>${monster.name}</strong> ${discountText}<br>
+                        <span class="stats-text">❤️HP:${monster.hp} ⚔️DMG:${monster.dmg}</span><br>
+                        <span class="price-tag">${info.price} 🪙</span>
+                    </div>
+                    <button style="width:auto; padding:8px 12px; font-size:14px;" onclick="buyMonster('${id}')" ${isOwned ? 'disabled' : ''}>${isOwned ? 'Куплен' : 'Купить'}</button>
+                `;
+                marketDiv.appendChild(itemDiv);
+            });
+        }
+
+        function setupSelectComponent(selectId) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '';
+            if (gameState.ownedIds.length === 0) {
+                const opt = document.createElement('option');
+                opt.text = "Сначала купи монстра в магазине!";
+                select.appendChild(opt);
+            } else {
+                gameState.ownedIds.forEach(id => {
+                    const opt = document.createElement('option');
+                    opt.value = id;
+                    opt.text = monsterDatabase[id].name;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        // Рендер кампании (Уровни)
+        function renderLevels() {
+            const div = document.getElementById('levels-list');
+            div.innerHTML = '';
+            
+            npcLevels.forEach(npc => {
+                const block = document.createElement('div');
+                block.className = 'level-block';
+                const canFight = gameState.ownedIds.length > 0;
+                
+                block.innerHTML = `
+                    <div>
+                        <b style="color:#10ac84;">Уровень ${npc.id}</b><br>
+                        <span>Враг: <b>${npc.name}</b> (❤️${npc.hp})</span><br>
+                        <span style="font-size:12px; color:#f1c40f;">Награда: +${npc.reward} 🪙</span>
+                    </div>
+                    <button style="width:auto; padding:10px; font-size:14px; background:#10ac84; box-shadow:0 3px 0 #0f8f6d;" 
+                        onclick="startNpcFight(${npc.id})" ${!canFight ? 'disabled' : ''}>В Бой</button>
+                `;
+                div.appendChild(block);
+            });
+        }
+
+        // Общая функция симулятора пошагового сражения
+        function runBattleCore(playerData, enemyData, prizeMoney, logElementId, zoneElementId) {
+            document.getElementById(zoneElementId).classList.remove('hidden');
+            const log = document.getElementById(logElementId);
+            log.innerHTML = '⚡ Инициализация аренды боя...<br>';
+
+            let player = { ...playerData };
+            let enemy = { ...enemyData };
+
+            log.innerHTML += `⚔️ <b>${player.name}</b> сталкивается лицом к лицу с <b>${enemy.name}</b>!<br><br>`;
+            let round = 1;
+
+            let timer = setInterval(() => {
+                log.innerHTML += `• [Раунд ${round}] •<br>`;
+                
+                // Твой Удар
+                let pDmg = Math.max(3, player.dmg - (enemy.def || 0));
+                if (gameState.ownedIds.includes('dragon') && Math.random() > 0.6) pDmg += 15; 
+                if (gameState.ownedIds.includes('pekka') && Math.random() > 0.7) pDmg *= 2;
+
+                enemy.hp -= pDmg;
+                log.innerHTML += `💥 ${player.name} наносит <b>${pDmg}</b> урона. У ${enemy.name} осталось ❤️${Math.max(0, enemy.hp)} HP.<br>`;
+
+                if (enemy.hp <= 0) {
+                    log.innerHTML += `<br>🏆 <b>ПОБЕДА!</b> Вы повергли врага!<br>💰 Ваша награда: <b>+${prizeMoney} монет!</b><br>`;
+                    gameState.coins += prizeMoney;
+                    updateUI();
+                    saveGame();
+                    clearInterval(timer);
+                    return;
+                }
+
+                // Удар Врага
+                let eDmg = Math.max(3, enemy.dmg - (player.def || 0));
+                if (gameState.ownedIds.includes('golem') && Math.random() > 0.5) eDmg = Math.round(eDmg / 2);
+
+                player.hp -= eDmg;
+                log.innerHTML += `🥊 ${enemy.name} контратакует на <b>${eDmg}</b>. У тебя осталось ❤️${Math.max(0, player.hp)} HP.<br><br>`;
+
+                if (player.hp <= 0) {
+                    log.innerHTML += `<br>💀 <b>ПОРАЖЕНИЕ!</b> Твой монстр пал в бою. Вернись в дом или смени тактику!<br>`;
+                    clearInterval(timer);
+                    return;
+                }
+
+                round++;
+                log.scrollTop = log.scrollHeight;
+            }, 1000);
+        }
+
+        // Бой на Уровнях (Кампания)
+        function startNpcFight(levelId) {
+            if (gameState.ownedIds.length === 0) return;
+            const myId = document.getElementById('level-fighter-select').value;
+            const player = monsterDatabase[myId];
+            const npc = npcLevels.find(n => n.id === levelId);
+
+            runBattleCore(player, npc, npc.reward, 'level-battle-log', 'level-battle-zone');
+        }
+
+        // Бой с Друзьями (Дуэли)
+        function startFriendFight() {
+            if (gameState.ownedIds.length === 0) return;
+            const myId = document.getElementById('fighter-select').value;
+            const player = monsterDatabase[myId];
+            
+            const keys = Object.keys(monsterDatabase);
+            const randomEnemyId = keys[Math.floor(Math.random() * keys.length)];
+            const enemy = { ...monsterDatabase[randomEnemyId], name: "Монстр Друга (" + monsterDatabase[randomEnemyId].name + ")" };
+            
+            const prize = parseInt(document.getElementById('battle-bet').innerText);
+
+            runBattleCore(player, enemy, prize, 'battle-log', 'battle-zone');
+        }
+
+        // Функция очистки (на всякий случай перенесена внутрь скрытых настроек)
+        function clearAllDataDebug() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        window.onload = loadGame;
+    </script>
+</body>
+</html>
