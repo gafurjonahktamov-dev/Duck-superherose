@@ -137,14 +137,12 @@
             transition: background 0.5s;
         }
         
-        /* Слой заднего декора (трава, облака, искры) */
         .field-decor {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; display: flex; wrap: wrap; justify-content: space-around;
             align-content: space-around; opacity: 0.35; font-size: 24px; z-index: 1;
         }
 
-        /* Анимация плавного парения элементов декора */
         @keyframes floatingDecor {
             0% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-10px) rotate(5deg); }
@@ -165,6 +163,14 @@
         .damage-pop { position: absolute; color: #ff4757; font-weight: bold; font-size: 26px; text-shadow: 2px 2px 0px #000; z-index: 10; animation: popUp 0.8s forwards; }
         @keyframes popUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-30px); } }
 
+        /* СПИСОК ПИСЕМ И ДРУЗЕЙ */
+        .mail-item, .friend-item {
+            background: #252f3d; padding: 10px; border-radius: 10px;
+            margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+            border-left: 4px solid #ffbc00;
+        }
+        .friend-item { border-left-color: #00d2d3; }
+
         /* ОКНА И ВЫБОР СТОРОНЫ */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 200; }
         .modal-content { background: #1b222c; padding: 20px; border-radius: 16px; width: 85%; max-width: 400px; border: 2px solid #ffbc00; text-align: center; }
@@ -179,7 +185,8 @@
             width: 100%; max-width: 500px; background-color: #1b222c;
             display: flex; justify-content: space-around; padding: 12px 0; border-top: 2px solid #2c3848; z-index: 100;
         }
-        .nav-btn { background-color: #252f3d; color: white; padding: 10px; font-size: 13px; width: 22%; border-radius: 8px; }
+        .nav-btn { background-color: #252f3d; color: white; padding: 8px; font-size: 12px; width: 18%; border-radius: 8px; position: relative; }
+        .mail-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; font-size: 9px; padding: 2px 5px; border-radius: 50%; font-weight: bold; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -218,7 +225,7 @@
                     Твой ID: <b id="my-id-display" style="color: #ffbc00; cursor:pointer;" onclick="copyMyId()">ID-0000</b> (Нажми для копирования)
                 </p>
                 <div id="home-monsters-grid" class="monster-grid"></div>
-                <button style="margin-top:15px; font-size:11px; padding:6px; background:#555; color:white; box-shadow:none;" onclick="resetGame()">🔄 Сбросить фракцию</button>
+                <button style="margin-top:15px; font-size:11px; padding:6px; background:#555; color:white; box-shadow:none;" onclick="resetGame()">🔄 Сбросить прогресс</button>
             </div>
         </div>
 
@@ -262,15 +269,31 @@
 
         <div id="tab-friends" class="tab-content hidden">
             <div class="card" style="text-align: center;">
-                <h2>⚔️ Вызов на Дуэль</h2>
-                <input type="text" id="friend-id-input" placeholder="ID друга (Пример: ID-1234)">
-                <button style="width: 100%; margin-bottom: 15px;" onclick="startFriendBattle()">Начать бой</button>
-                
-                <hr style="border-color:#3d4d63; margin: 15px 0;">
-                
+                <h2>📡 Найти игрока по ID</h2>
+                <input type="text" id="friend-id-input" placeholder="Введи ID (Например: ID-5412)">
+                <button style="width: 100%; margin-bottom: 10px;" onclick="sendFriendRequest()">➕ Отправить запрос дружбы</button>
+            </div>
+
+            <div class="card">
                 <h2>🔄 Межфракционный Обмен Утками</h2>
                 <select id="trade-duck-select"></select>
-                <button style="width: 100%; background:#00d2d3; color:#000;" onclick="executeTrade()">Отправить утку на обмен</button>
+                <button style="width: 100%; background:#00d2d3; color:#000;" onclick="executeTrade()">Отправить утку на случайный обмен</button>
+            </div>
+        </div>
+
+        <div id="tab-mail" class="tab-content hidden">
+            <div class="card">
+                <h2>📩 Входящие запросы (Почта)</h2>
+                <div id="mail-list-container">
+                    <p style="font-size:13px; color:#aaa; text-align:center;">Писем нет. Отправь свой ID другу, чтобы он прислал запрос!</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>👥 Мои Друзья</h2>
+                <div id="friends-list-container">
+                    <p style="font-size:13px; color:#aaa; text-align:center;">Список пуст. Прими дружбу на почте, чтобы подружиться навсегда!</p>
+                </div>
             </div>
         </div>
 
@@ -300,7 +323,8 @@
         <button class="nav-btn" style="background-color: #ffbc00; color: black;" onclick="switchTab('home')">Штаб</button>
         <button class="nav-btn" onclick="switchTab('shop')">Магазин</button>
         <button class="nav-btn" onclick="switchTab('levels')">Локации</button>
-        <button class="nav-btn" onclick="switchTab('friends')">Друзья</button>
+        <button class="nav-btn" onclick="switchTab('friends')">Связь</button>
+        <button class="nav-btn" onclick="switchTab('mail')">Почта <span id="mail-counter" class="mail-badge hidden">!</span></button>
     </div>
 
     <script>
@@ -328,57 +352,31 @@
             chocolate: { n: 'Шоколадка',emoji: '🍫', xp: 200, price: 190 }
         };
 
-        // НАСТРОЙКИ БИОМОВ ДЛЯ ЛОКАЦИЙ
         const locationBiomes = {
-            forest: {
-                name: "Дикий утиный лес",
-                bg: "linear-gradient(180deg, #1e3c16 0%, #3a602a 100%)",
-                decor: ["🌲", "🌳", "🐦", "🍃", "🍄", "🌱"]
-            },
-            cave: {
-                name: "Заброшенные пещеры",
-                bg: "linear-gradient(180deg, #111116 0%, #2c2d35 100%)",
-                decor: ["🦇", "🦨", "🪨", "🕸️", "💎", "🦴"]
-            },
-            neonCity: {
-                name: "Кибер-Неоновый Город",
-                bg: "linear-gradient(180deg, #09091e 0%, #1a0826 100%)",
-                decor: ["🏙️", "⚡", "🤖", "🚨", "🔋", "🥏"]
-            },
-            lava: {
-                name: "Лавовое ущелье",
-                bg: "linear-gradient(180deg, #2d0b00 0%, #571700 100%)",
-                decor: ["🌋", "🔥", "☄️", "💥", "💨", "🖤"]
-            },
-            space: {
-                name: "Космическая Цитадель",
-                bg: "linear-gradient(180deg, #020208 0%, #0d1b2a 100%)",
-                decor: ["🌌", "🪐", "✨", "🛸", "☄️", "🌟"]
-            }
+            forest: { name: "Дикий утиный лес", bg: "linear-gradient(180deg, #1e3c16 0%, #3a602a 100%)", decor: ["🌲", "🌳", "🐦", "🍃", "🍄", "🌱"] },
+            cave: { name: "Заброшенные пещеры", bg: "linear-gradient(180deg, #111116 0%, #2c2d35 100%)", decor: ["🦇", "🦨", "🪨", "🕸️", "💎", "🦴"] },
+            neonCity: { name: "Кибер-Неоновый Город", bg: "linear-gradient(180deg, #09091e 0%, #1a0826 100%)", decor: ["🏙️", "⚡", "🤖", "🚨", "🔋", "🥏"] },
+            lava: { name: "Лавовое ущелье", bg: "linear-gradient(180deg, #2d0b00 0%, #571700 100%)", decor: ["🌋", "🔥", "☄️", "💥", "💨", "🖤"] },
+            space: { name: "Космическая Цитадель", bg: "linear-gradient(180deg, #020208 0%, #0d1b2a 100%)", decor: ["🌌", "🪐", "✨", "🛸", "☄️", "🌟"] }
         };
 
         let gameState = {
-            fraction: null,
-            coins: 150,
-            inventory: [],
-            teamUids: [],
+            fraction: null, coins: 150, inventory: [], teamUids: [],
             food: { bread: 2, toast: 1, donut: 0, cheese: 0, chocolate: 0 },
-            boxesOpened: 0,
-            currentLevel: 1,
-            myId: ''
+            boxesOpened: 0, currentLevel: 1, myId: '',
+            incomingMail: [], // Почтовый ящик
+            friendsList: []   // Список друзей
         };
 
         let battleState = null;
         let selectedInventoryUid = null;
 
-        function getActiveDb() {
-            return gameState.fraction === 'villains' ? villainsDatabase : heroesDatabase;
-        }
+        function getActiveDb() { return gameState.fraction === 'villains' ? villainsDatabase : heroesDatabase; }
 
         function getSavedData() {
-            let local = localStorage.getItem('super_ducks_fraction_v2');
+            let local = localStorage.getItem('super_ducks_fraction_v3');
             if (local) return local;
-            let name = "ducks_save=";
+            let name = "ducks_save3=";
             let decodedCookie = decodeURIComponent(document.cookie);
             let ca = decodedCookie.split(';');
             for(let i = 0; i < ca.length; i++) {
@@ -390,9 +388,9 @@
 
         function loadGame() {
             const saved = getSavedData();
-            if (saved) {
-                try { gameState = JSON.parse(saved); } catch(e) {}
-            }
+            if (saved) { try { gameState = JSON.parse(saved); } catch(e) {} }
+            if (!gameState.incomingMail) gameState.incomingMail = [];
+            if (!gameState.friendsList) gameState.friendsList = [];
             
             if (!gameState.myId) {
                 gameState.myId = 'ID-' + Math.floor(1000 + Math.random() * 9000);
@@ -408,25 +406,24 @@
 
         function chooseFraction(side) {
             gameState.fraction = side;
-            const db = getActiveDb();
-            const keys = Object.keys(db);
-            
+            const db = getActiveDb(); const keys = Object.keys(db);
             gameState.inventory = [
                 { uid: 'u_start1', id: keys[0], lvl: 1, xp: 0 },
                 { uid: 'u_start2', id: keys[1], lvl: 1, xp: 0 }
             ];
             gameState.teamUids = ['u_start1'];
             
+            // Тестовое письмо при старте, чтобы показать игроку как работает Почта
+            gameState.incomingMail.push({ id: 'mail_' + Date.now(), fromId: 'ID-7777', type: 'friend_request' });
+
             document.getElementById('fraction-modal').classList.add('hidden');
-            saveGame();
-            initGameUI();
+            saveGame(); initGameUI();
         }
 
         function restoreOldGame() {
             let enteredId = document.getElementById('restore-id-input').value.trim();
             if (!enteredId.startsWith('ID-')) { alert('Неверный формат ID!'); return; }
-            gameState.myId = enteredId;
-            chooseFraction('heroes');
+            gameState.myId = enteredId; chooseFraction('heroes');
         }
 
         function initGameUI() {
@@ -437,29 +434,26 @@
                 document.getElementById('fraction-title').innerText = '🦹‍♂️ Синдикат Злодеев';
                 document.getElementById('hq-title').innerText = '🦹‍♂️ Логово Злодеев';
             }
-            updateUI();
-            renderCapsules();
-            renderFoodMarket();
+            updateUI(); renderCapsules(); renderFoodMarket(); checkMailBadge();
         }
 
         function saveGame() {
             let strData = JSON.stringify(gameState);
-            localStorage.setItem('super_ducks_fraction_v2', strData);
-            let d = new Date();
-            d.setTime(d.getTime() + (365*24*60*60*1000));
-            document.cookie = "ducks_save=" + strData + ";expires="+ d.toUTCString() + ";path=/";
+            localStorage.setItem('super_ducks_fraction_v3', strData);
+            let d = new Date(); d.setTime(d.getTime() + (365*24*60*60*1000));
+            document.cookie = "ducks_save3=" + strData + ";expires="+ d.toUTCString() + ";path=/";
         }
 
         function copyMyId() {
             navigator.clipboard.writeText(gameState.myId).then(() => {
-                alert(`ID скопирован: ${gameState.myId}\nСохрани его в заметках! Если игра на телефоне сбросится, ты сможешь ввести его обратно.`);
+                alert(`ID скопирован: ${gameState.myId}\nОтправь его другу!`);
             });
         }
 
         function resetGame() {
             if (confirm('Сбросить весь прогресс аккаунта?')) {
-                localStorage.removeItem('super_ducks_fraction_v2');
-                document.cookie = "ducks_save=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                localStorage.removeItem('super_ducks_fraction_v3');
+                document.cookie = "ducks_save3=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                 location.reload();
             }
         }
@@ -469,6 +463,7 @@
             if (tabName === 'home') document.getElementById('tab-home').classList.remove('hidden');
             if (tabName === 'shop') document.getElementById('tab-shop').classList.remove('hidden');
             if (tabName === 'friends') { document.getElementById('tab-friends').classList.remove('hidden'); setupTradeSelect(); }
+            if (tabName === 'mail') { document.getElementById('tab-mail').classList.remove('hidden'); renderMailAndFriends(); }
             if (tabName === 'levels') {
                 document.getElementById('tab-levels').classList.remove('hidden');
                 document.getElementById('levels-selection-card').classList.remove('hidden');
@@ -477,57 +472,130 @@
             }
         }
 
+        /* 📬 СИСТЕМА ПОЧТЫ И СВЯЗИ ДЖЕМА */
+        function sendFriendRequest() {
+            let fId = document.getElementById('friend-id-input').value.trim();
+            if (!fId.startsWith('ID-') || fId.length < 5) { alert('Неверный формат ID!'); return; }
+            if (fId === gameState.myId) { alert('Нельзя отправить запрос самому себе!'); return; }
+            
+            alert(`📡 Запрос отправлен на устройство ${fId}!\nКогда твой друг зайдет в игру, у него на Почте появится значок.`);
+            
+            // Имитируем, что если мы ввели ID, то и к нам придет запрос от этого игрока для теста на одном телефоне
+            if(!gameState.friendsList.includes(fId) && !gameState.incomingMail.some(m => m.fromId === fId)) {
+                gameState.incomingMail.push({ id: 'mail_' + Date.now(), fromId: fId, type: 'friend_request' });
+                checkMailBadge(); saveGame();
+            }
+            document.getElementById('friend-id-input').value = '';
+        }
+
+        function checkMailBadge() {
+            const badge = document.getElementById('mail-counter');
+            if(gameState.incomingMail.length > 0) {
+                badge.classList.remove('hidden');
+                badge.innerText = gameState.incomingMail.length;
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function renderMailAndFriends() {
+            // 1. Рендеринг почты
+            const mailContainer = document.getElementById('mail-list-container');
+            mailContainer.innerHTML = '';
+            if (gameState.incomingMail.length === 0) {
+                mailContainer.innerHTML = `<p style="font-size:13px; color:#aaa; text-align:center;">Входящих писем нет.</p>`;
+            } else {
+                gameState.incomingMail.forEach(mail => {
+                    const div = document.createElement('div'); div.className = 'mail-item';
+                    div.innerHTML = `
+                        <div>
+                            <b style="color:#ffbc00;">✉️ Запрос дружбы</b><br>
+                            <small>От: ${mail.fromId}</small>
+                        </div>
+                        <div>
+                            <button style="padding:4px 8px; font-size:11px; background:#2ecc71; color:white; box-shadow:none; margin-right:5px;" onclick="acceptFriend('${mail.id}', '${mail.fromId}')">Принять</button>
+                            <button style="padding:4px 8px; font-size:11px; background:#ff4757; color:white; box-shadow:none;" onclick="declineMail('${mail.id}')">Х</button>
+                        </div>
+                    `;
+                    mailContainer.appendChild(div);
+                });
+            }
+
+            // 2. Рендеринг списка друзей
+            const friendsContainer = document.getElementById('friends-list-container');
+            friendsContainer.innerHTML = '';
+            if (gameState.friendsList.length === 0) {
+                friendsContainer.innerHTML = `<p style="font-size:13px; color:#aaa; text-align:center;">У тебя пока нет сохранённых друзей.</p>`;
+            } else {
+                gameState.friendsList.forEach(fId => {
+                    const div = document.createElement('div'); div.className = 'friend-item';
+                    div.innerHTML = `
+                        <div><b>🦆 Друг (${fId})</b><br><small style="color:#00d2d3;">В сети</small></div>
+                        <div>
+                            <button style="padding:5px 10px; font-size:12px; background:#ffbc00;" onclick="startFriendBattleFromList('${fId}')">⚔️ Дуэль</button>
+                        </div>
+                    `;
+                    friendsContainer.appendChild(div);
+                });
+            }
+        }
+
+        function acceptFriend(mailId, fromId) {
+            if (!gameState.friendsList.includes(fromId)) {
+                gameState.friendsList.push(fromId);
+            }
+            gameState.incomingMail = gameState.incomingMail.filter(m => m.id !== mailId);
+            alert(`🤝 Ты и ${fromId} теперь друзья! Друг добавлен в список на Почте.`);
+            checkMailBadge(); saveGame(); renderMailAndFriends();
+        }
+
+        function declineMail(mailId) {
+            gameState.incomingMail = gameState.incomingMail.filter(m => m.id !== mailId);
+            checkMailBadge(); saveGame(); renderMailAndFriends();
+        }
+
+        function startFriendBattleFromList(fId) {
+            switchTab('levels');
+            startBattleCore('friend', fId);
+        }
+
+
+        /* ОСТАЛЬНОЙ ФУНКЦИОНАЛ ИГРЫ */
         function renderCapsules() {
             const container = document.getElementById('capsules-market'); container.innerHTML = '';
             const sideName = gameState.fraction === 'heroes' ? 'Геройское яйцо' : 'Злодейский ящик';
-            
             const div = document.createElement('div');
             div.style = 'background:#252f3d; padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;';
-            div.innerHTML = `<div><b>${sideName}</b><br><small>Цена: 50 🪙</small></div>
-                             <button style="padding:6px 12px;" onclick="buyCapsule()">Открыть</button>`;
+            div.innerHTML = `<div><b>${sideName}</b><br><small>Цена: 50 🪙</small></div><button style="padding:6px 12px;" onclick="buyCapsule()">Открыть</button>`;
             container.appendChild(div);
         }
 
         function renderFoodMarket() {
             const container = document.getElementById('food-market'); container.innerHTML = '';
             Object.keys(foodDatabase).forEach(fKey => {
-                const f = foodDatabase[fKey];
-                const div = document.createElement('div'); div.className = 'food-item-card';
-                div.innerHTML = `<div style="font-size:24px;">${f.emoji}</div>
-                                 <div style="font-size:12px; font-weight:bold;">${f.n} (+${f.xp} XP)</div>
-                                 <button style="padding:4px 8px; font-size:11px; margin-top:6px; width:100%;" onclick="buyFood('${fKey}')">${f.price} 🪙</button>`;
+                const f = foodDatabase[fKey]; const div = document.createElement('div'); div.className = 'food-item-card';
+                div.innerHTML = `<div style="font-size:24px;">${f.emoji}</div><div style="font-size:12px; font-weight:bold;">${f.n} (+${f.xp} XP)</div><button style="padding:4px 8px; font-size:11px; margin-top:6px; width:100%;" onclick="buyFood('${fKey}')">${f.price} 🪙</button>`;
                 container.appendChild(div);
             });
         }
 
         function buyFood(fKey) {
             const f = foodDatabase[fKey];
-            if (gameState.coins >= f.price) {
-                gameState.coins -= f.price;
-                gameState.food[fKey]++;
-                updateUI(); saveGame();
-            } else { alert('Недостаточно монет!'); }
+            if (gameState.coins >= f.price) { gameState.coins -= f.price; gameState.food[fKey]++; updateUI(); saveGame(); } else { alert('Недостаточно монет!'); }
         }
 
         function buyCapsule() {
             if (gameState.coins < 50) { alert('Не хватает монет!'); return; }
-            gameState.coins -= 50;
-            gameState.boxesOpened++;
-
+            gameState.coins -= 50; gameState.boxesOpened++;
             let forceHero = gameState.boxesOpened <= 3;
             let rolledFood = !forceHero && Math.random() < 0.40;
 
             if (rolledFood) {
-                let foodKeys = Object.keys(foodDatabase);
-                let randomFoodKey = foodKeys[Math.floor(Math.random() * foodKeys.length)];
-                gameState.food[randomFoodKey] += 2;
-                alert(`📦 Найдена провизия: ${foodDatabase[randomFoodKey].emoji} ${foodDatabase[randomFoodKey].n} x2!`);
+                let foodKeys = Object.keys(foodDatabase); let randomFoodKey = foodKeys[Math.floor(Math.random() * foodKeys.length)];
+                gameState.food[randomFoodKey] += 2; alert(`📦 Найдена провизия: ${foodDatabase[randomFoodKey].emoji} ${foodDatabase[randomFoodKey].n} x2!`);
             } else {
-                const db = getActiveDb();
-                const keys = Object.keys(db);
-                let rId = keys[Math.floor(Math.random() * keys.length)];
-                let newUid = 'u_' + Date.now();
-                gameState.inventory.push({ uid: newUid, id: rId, lvl: 1, xp: 0 });
+                const db = getActiveDb(); const keys = Object.keys(db); let rId = keys[Math.floor(Math.random() * keys.length)];
+                let newUid = 'u_' + Date.now(); gameState.inventory.push({ uid: newUid, id: rId, lvl: 1, xp: 0 });
                 alert(`💥 В твой отряд вступает: ${db[rId].name}!`);
             }
             updateUI(); saveGame();
@@ -536,183 +604,110 @@
         function updateUI() {
             document.getElementById('coins-display').innerText = gameState.coins;
             const grid = document.getElementById('home-monsters-grid'); grid.innerHTML = '';
-            
             const db = getActiveDb();
             gameState.inventory.forEach(item => {
-                const base = db[item.id];
-                if(!base) return; 
+                const base = db[item.id]; if(!base) return; 
                 const isInTeam = gameState.teamUids.includes(item.uid);
-                let targetXp = item.lvl * 50;
-                let xpPerc = Math.min(100, (item.xp / targetXp) * 100);
-
-                const div = document.createElement('div');
-                div.className = `monster-card ${isInTeam ? 'in-team' : ''}`;
-                div.innerHTML = `
-                    ${isInTeam ? '<div class="team-status">В БОЮ</div>' : ''}
-                    <div class="monster-avatar">${base.avatar}</div>
-                    <div class="monster-name">${base.name}</div>
-                    <div class="monster-lvl">Ур. ${item.lvl}</div>
-                    <div class="xp-bar-bg"><div class="xp-bar" style="width: ${xpPerc}%"></div></div>
-                `;
-                div.onclick = () => openDuckModal(item.uid);
-                grid.appendChild(div);
+                let targetXp = item.lvl * 50; let xpPerc = Math.min(100, (item.xp / targetXp) * 100);
+                const div = document.createElement('div'); div.className = `monster-card ${isInTeam ? 'in-team' : ''}`;
+                div.innerHTML = `${isInTeam ? '<div class="team-status">В БОЮ</div>' : ''}<div class="monster-avatar">${base.avatar}</div><div class="monster-name">${base.name}</div><div class="monster-lvl">Ур. ${item.lvl}</div><div class="xp-bar-bg"><div class="xp-bar" style="width: ${xpPerc}%"></div></div>`;
+                div.onclick = () => openDuckModal(item.uid); grid.appendChild(div);
             });
         }
 
         function openDuckModal(uid) {
-            selectedInventoryUid = uid;
-            const item = gameState.inventory.find(i => i.uid === uid);
-            const db = getActiveDb();
-            const base = db[item.id];
-            const isInTeam = gameState.teamUids.includes(uid);
-
-            document.getElementById('modal-duck-name').innerText = base.name;
-            document.getElementById('modal-duck-avatar').innerText = base.avatar;
-            
-            let calculatedHp = base.hp + (item.lvl - 1) * 20;
-            let targetXp = item.lvl * 50;
+            selectedInventoryUid = uid; const item = gameState.inventory.find(i => i.uid === uid);
+            const db = getActiveDb(); const base = db[item.id]; const isInTeam = gameState.teamUids.includes(uid);
+            document.getElementById('modal-duck-name').innerText = base.name; document.getElementById('modal-duck-avatar').innerText = base.avatar;
+            let calculatedHp = base.hp + (item.lvl - 1) * 20; let targetXp = item.lvl * 50;
             document.getElementById('modal-duck-stats').innerText = `Уровень: ${item.lvl} | Опыт: ${item.xp}/${targetXp} | HP: ${calculatedHp}`;
-
-            const teamBtn = document.getElementById('modal-btn-team');
-            teamBtn.innerText = isInTeam ? '❌ Убрать из отряда' : '✅ Выбрать для атаки';
-            
-            const sellPrice = base.sellPrice + (item.lvl * 6);
-            document.getElementById('modal-btn-sell').innerText = `💰 Продать за ${sellPrice} 🪙`;
+            const teamBtn = document.getElementById('modal-btn-team'); teamBtn.innerText = isInTeam ? '❌ Убрать из отряда' : '✅ Выбрать для атаки';
+            const sellPrice = base.sellPrice + (item.lvl * 6); document.getElementById('modal-btn-sell').innerText = `💰 Продать за ${sellPrice} 🪙`;
             document.getElementById('modal-btn-sell').onclick = () => sellDuck(uid, sellPrice);
-
             const select = document.getElementById('food-feed-select'); select.innerHTML = '';
             Object.keys(foodDatabase).forEach(fKey => {
-                const count = gameState.food[fKey];
-                const opt = document.createElement('option'); opt.value = fKey;
-                opt.innerText = `${foodDatabase[fKey].emoji} ${foodDatabase[fKey].n} (${count} шт.)`;
-                select.appendChild(opt);
+                const count = gameState.food[fKey]; const opt = document.createElement('option'); opt.value = fKey;
+                opt.innerText = `${foodDatabase[fKey].emoji} ${foodDatabase[fKey].n} (${count} шт.)`; select.appendChild(opt);
             });
-
             document.getElementById('duck-modal').classList.remove('hidden');
         }
 
         function closeModal() { document.getElementById('duck-modal').classList.add('hidden'); }
 
         function feedDuckAction() {
-            const fKey = document.getElementById('food-feed-select').value;
-            if (gameState.food[fKey] <= 0) { alert('Этого продукта нет в наличии!'); return; }
-
-            gameState.food[fKey]--;
-            const item = gameState.inventory.find(i => i.uid === selectedInventoryUid);
-            item.xp += foodDatabase[fKey].xp;
-            let targetXp = item.lvl * 50;
-
-            while (item.xp >= targetXp) {
-                item.xp -= targetXp;
-                item.lvl++;
-                targetXp = item.lvl * 50;
-            }
+            const fKey = document.getElementById('food-feed-select').value; if (gameState.food[fKey] <= 0) { alert('Продукта нет!'); return; }
+            gameState.food[fKey]--; const item = gameState.inventory.find(i => i.uid === selectedInventoryUid);
+            item.xp += foodDatabase[fKey].xp; let targetXp = item.lvl * 50;
+            while (item.xp >= targetXp) { item.xp -= targetXp; item.lvl++; targetXp = item.lvl * 50; }
             saveGame(); updateUI(); openDuckModal(selectedInventoryUid);
         }
 
         function modalToggleTeam() {
-            const uid = selectedInventoryUid;
-            const idx = gameState.teamUids.indexOf(uid);
+            const uid = selectedInventoryUid; const idx = gameState.teamUids.indexOf(uid);
             if (idx > -1) { gameState.teamUids.splice(idx, 1); } 
-            else {
-                if (gameState.teamUids.length >= 3) { alert('В отряде не может быть больше 3 уток!'); return; }
-                gameState.teamUids.push(uid);
-            }
+            else { if (gameState.teamUids.length >= 3) { alert('Максимум 3 утки!'); return; } gameState.teamUids.push(uid); }
             closeModal(); updateUI(); saveGame();
         }
 
         function sellDuck(uid, price) {
-            if (gameState.inventory.length <= 1) { alert('Нельзя ликвидировать последнюю утку!'); return; }
-            gameState.coins += price;
-            gameState.inventory = gameState.inventory.filter(i => i.uid !== uid);
-            gameState.teamUids = gameState.teamUids.filter(tUid => tUid !== targetUid);
-            closeModal(); updateUI(); saveGame();
+            if (gameState.inventory.length <= 1) { alert('Нельзя удалить последнюю утку!'); return; }
+            gameState.coins += price; gameState.inventory = gameState.inventory.filter(i => i.uid !== uid);
+            gameState.teamUids = gameState.teamUids.filter(tUid => tUid !== uid); closeModal(); updateUI(); saveGame();
         }
 
         function renderLevelBadges() {
             const container = document.getElementById('levels-badge-container'); container.innerHTML = '';
             for (let i = 1; i <= 50; i++) {
-                const badge = document.createElement('div');
-                badge.className = `level-badge ${i <= gameState.currentLevel ? 'unlocked' : 'locked'}`;
-                badge.innerText = i;
-                if (i <= gameState.currentLevel) badge.onclick = () => startBattleCore('level', i);
+                const badge = document.createElement('div'); badge.className = `level-badge ${i <= gameState.currentLevel ? 'unlocked' : 'locked'}`;
+                badge.innerText = i; if (i <= gameState.currentLevel) badge.onclick = () => startBattleCore('level', i);
                 container.appendChild(badge);
             }
         }
 
-        // ОПРЕДЕЛЕНИЕ И ГЕНЕРАЦИЯ ДЕКОРА БИОМА
         function applyBiomeDecoration(lvl) {
-            let biome = locationBiomes.forest; // По умолчанию первый биом
-            
+            let biome = locationBiomes.forest;
             if (lvl > 10 && lvl <= 20) biome = locationBiomes.cave;
             else if (lvl > 20 && lvl <= 30) biome = locationBiomes.neonCity;
             else if (lvl > 30 && lvl <= 40) biome = locationBiomes.lava;
             else if (lvl > 40) biome = locationBiomes.space;
 
-            // Настройка названия локации и бэкграунда
             document.getElementById('location-title').innerText = `${biome.name} (Этап ${lvl})`;
-            const arena = document.getElementById('battle-arena');
-            arena.style.background = biome.bg;
-
-            // Заполнение слоя декораций случайными объектами биома
-            const decorLayer = document.getElementById('battle-decor-layer');
-            decorLayer.innerHTML = '';
-            
-            // Генерируем 8 случайных элементов декора на поле
+            document.getElementById('battle-arena').style.background = biome.bg;
+            const decorLayer = document.getElementById('battle-decor-layer'); decorLayer.innerHTML = '';
             for(let i = 0; i < 8; i++) {
                 const randomEmoji = biome.decor[Math.floor(Math.random() * biome.decor.length)];
-                const span = document.createElement('span');
-                span.className = 'decor-item';
-                span.innerText = randomEmoji;
-                span.style.animationDelay = `${Math.random() * 2}s`;
-                span.style.fontSize = `${16 + Math.random() * 14}px`;
+                const span = document.createElement('span'); span.className = 'decor-item'; span.innerText = randomEmoji;
+                span.style.animationDelay = `${Math.random() * 2}s`; span.style.fontSize = `${16 + Math.random() * 14}px`;
                 decorLayer.appendChild(span);
             }
         }
 
         function startBattleCore(mode, targetData) {
             if (gameState.teamUids.length === 0) { alert('Сформируй боевой отряд в Штабе!'); return; }
-
             document.getElementById('levels-selection-card').classList.add('hidden');
             document.getElementById('battle-field-card').classList.remove('hidden');
 
-            // Применяем декорации локации в зависимости от уровня
-            let currentLvlNum = mode === 'level' ? targetData : 1;
-            applyBiomeDecoration(currentLvlNum);
-
+            let currentLvlNum = mode === 'level' ? targetData : 1; applyBiomeDecoration(currentLvlNum);
             const db = getActiveDb();
             let playerUnits = gameState.teamUids.map((uid) => {
-                const invItem = gameState.inventory.find(i => i.uid === uid);
-                const base = db[invItem.id];
+                const invItem = gameState.inventory.find(i => i.uid === uid); const base = db[invItem.id];
                 let hpBonus = base.hp + (invItem.lvl - 1) * 20;
                 let copiedSkills = base.skills.map(s => ({ n: s.n, d: s.d + (invItem.lvl * 2), cd: s.cd, curCd: 0 }));
                 return { uid: uid, name: base.name, avatar: base.avatar, hp: hpBonus, maxHp: hpBonus, skills: copiedSkills };
             });
 
             let enemyUnits = [];
-            
             if (mode === 'level') {
-                let enemyHp = 45 + (targetData * 11);
-                let enemyDmg = 5 + (targetData * 2);
-                
+                let enemyHp = 45 + (targetData * 11); let enemyDmg = 5 + (targetData * 2);
                 let enemyAvatars = gameState.fraction === 'heroes' ? ['🦢', '🦤', '🦅', '🦉'] : ['🕊️', '🦜', '🦩', '🦚'];
                 let enemyPrefix = gameState.fraction === 'heroes' ? 'Гангстер-Гусь' : 'Птица Правосудия';
-
                 for(let i = 0; i < 3; i++) {
-                    enemyUnits.push({ 
-                        uid: 'e_' + i, 
-                        name: `${enemyPrefix} #${i+1}`, 
-                        avatar: enemyAvatars[Math.floor(Math.random() * enemyAvatars.length)], 
-                        hp: enemyHp, maxHp: enemyHp, dmg: enemyDmg 
-                    });
+                    enemyUnits.push({ uid: 'e_' + i, name: `${enemyPrefix} #${i+1}`, avatar: enemyAvatars[Math.floor(Math.random() * enemyAvatars.length)], hp: enemyHp, maxHp: enemyHp, dmg: enemyDmg });
                 }
             } else if (mode === 'friend') {
                 document.getElementById('location-title').innerText = `Дуэль против ${targetData}`;
                 let seed = parseInt(targetData.replace('ID-', '')) || 999;
-                
-                let oppDb = gameState.fraction === 'heroes' ? villainsDatabase : heroesDatabase;
-                let oppKeys = Object.keys(oppDb);
-                
+                let oppDb = gameState.fraction === 'heroes' ? villainsDatabase : heroesDatabase; let oppKeys = Object.keys(oppDb);
                 for(let i = 0; i < 3; i++) {
                     let m = oppDb[oppKeys[(seed + i) % oppKeys.length]];
                     enemyUnits.push({ uid: 'e_' + i, name: 'Вражеский Наемник', avatar: m.avatar, hp: m.hp + 40, maxHp: m.hp + 40, dmg: Math.floor(m.skills[0].d * 0.9) });
@@ -720,8 +715,7 @@
             }
 
             battleState = { mode: mode, lvl: targetData, player: playerUnits, enemy: enemyUnits, selectedPlayerUid: null, phase: 'enemy_turn' };
-            renderField();
-            setTimeout(executeEnemyTurn, 1000);
+            renderField(); setTimeout(executeEnemyTurn, 1000);
         }
 
         function renderField() {
@@ -736,8 +730,7 @@
 
             const eSide = document.getElementById('enemy-side'); eSide.innerHTML = '';
             battleState.enemy.forEach(u => {
-                const div = document.createElement('div'); div.id = u.uid;
-                div.className = `field-unit enemy ${u.hp <= 0 ? 'dead' : ''}`;
+                const div = document.createElement('div'); div.id = u.uid; div.className = `field-unit enemy ${u.hp <= 0 ? 'dead' : ''}`;
                 div.innerHTML = `<div class="field-avatar">${u.avatar}</div><div class="field-name">${u.name}</div><div class="field-hp-bar-bg"><div class="field-hp-bar" style="width: ${(u.hp / u.maxHp) * 100}%"></div></div>`;
                 eSide.appendChild(div);
             });
@@ -756,18 +749,12 @@
                 let attacker = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
                 let target = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
                 target.hp -= attacker.dmg; if (target.hp < 0) target.hp = 0;
-                createDamagePop(target.uid, attacker.dmg);
-                renderField();
-
-                if (battleState.player.filter(u => u.hp > 0).length === 0) {
-                    alert('💀 Твой отряд полностью уничтожен!'); closeBattleField(); return;
-                }
+                createDamagePop(target.uid, attacker.dmg); renderField();
+                if (battleState.player.filter(u => u.hp > 0).length === 0) { alert('💀 Твой отряд разбит!'); closeBattleField(); return; }
             }
-
             battleState.player.forEach(u => { u.skills.forEach(s => { if (s.curCd > 0) s.curCd--; }); });
             battleState.phase = 'player_turn';
-            document.getElementById('turn-indicator').innerText = 'ТВОЙ ХОД! Выбери активную утку';
-            document.getElementById('turn-indicator').style.color = '#00d2d3';
+            document.getElementById('turn-indicator').innerText = 'ТВОЙ ХОД! Кликни на утку'; document.getElementById('turn-indicator').style.color = '#00d2d3';
             renderField();
         }
 
@@ -775,45 +762,28 @@
             battleState.selectedPlayerUid = uid; renderField();
             const unit = battleState.player.find(u => u.uid === uid);
             document.getElementById('selected-hero-name').innerText = `Приемы ${unit.avatar}:`;
-            
             const skillsContainer = document.getElementById('skills-buttons'); skillsContainer.innerHTML = '';
             unit.skills.forEach(skill => {
-                const b = document.createElement('button');
-                b.style.fontSize = '12px'; b.style.background = '#252f3d'; b.style.color = '#ffbc00';
-                if (skill.curCd > 0) {
-                    b.disabled = true; b.innerHTML = `${skill.n}<br><small style="color:#ff4757;">Перезарядка: ${skill.curCd} х.</small>`;
-                } else {
-                    b.innerHTML = `${skill.n}<br><small>Урон: ${skill.d}</small>`;
-                    b.onclick = () => useSkill(unit, skill);
-                }
+                const b = document.createElement('button'); b.style.fontSize = '12px'; b.style.background = '#252f3d'; b.style.color = '#ffbc00';
+                if (skill.curCd > 0) { b.disabled = true; b.innerHTML = `${skill.n}<br><small style="color:#ff4757;">КД: ${skill.curCd} х.</small>`; } 
+                else { b.innerHTML = `${skill.n}<br><small>Урон: ${skill.d}</small>`; b.onclick = () => useSkill(unit, skill); }
                 skillsContainer.appendChild(b);
             });
             document.getElementById('skills-control').classList.remove('hidden');
         }
 
         function useSkill(attacker, skill) {
-            let aliveEnemies = battleState.enemy.filter(u => u.hp > 0);
-            if (aliveEnemies.length === 0) return;
-
-            let target = aliveEnemies[0];
-            target.hp -= skill.d; if (target.hp < 0) target.hp = 0;
-            createDamagePop(target.uid, skill.d);
-            
-            skill.curCd = skill.cd;
-            battleState.selectedPlayerUid = null;
-            document.getElementById('skills-control').classList.add('hidden');
-            renderField();
+            let aliveEnemies = battleState.enemy.filter(u => u.hp > 0); if (aliveEnemies.length === 0) return;
+            let target = aliveEnemies[0]; target.hp -= skill.d; if (target.hp < 0) target.hp = 0;
+            createDamagePop(target.uid, skill.d); skill.curCd = skill.cd; battleState.selectedPlayerUid = null;
+            document.getElementById('skills-control').classList.add('hidden'); renderField();
 
             if (battleState.enemy.filter(u => u.hp > 0).length === 0) {
-                let prize = battleState.mode === 'level' ? (40 + (battleState.lvl * 15)) : 220;
-                gameState.coins += prize;
+                let prize = battleState.mode === 'level' ? (40 + (battleState.lvl * 15)) : 220; gameState.coins += prize;
                 if (battleState.mode === 'level' && battleState.lvl === gameState.currentLevel && gameState.currentLevel < 50) { gameState.currentLevel++; }
-                alert(`🏆 ПОБЕДА ФРАКЦИИ!\n+${prize} 🪙`);
-                closeBattleField(); return;
+                alert(`🏆 ПОБЕДА ФРАКЦИИ!\n+${prize} 🪙`); closeBattleField(); return;
             }
-
-            battleState.phase = 'enemy_turn';
-            setTimeout(executeEnemyTurn, 1000);
+            battleState.phase = 'enemy_turn'; setTimeout(executeEnemyTurn, 1000);
         }
 
         function createDamagePop(unitUid, value) {
@@ -825,48 +795,28 @@
         function closeBattleField() {
             battleState = null; saveGame(); updateUI();
             document.getElementById('battle-field-card').classList.add('hidden');
-            document.getElementById('levels-selection-card').classList.remove('hidden');
-            renderLevelBadges();
+            document.getElementById('levels-selection-card').classList.remove('hidden'); renderLevelBadges();
         }
 
         function setupTradeSelect() {
-            const select = document.getElementById('trade-duck-select'); select.innerHTML = '';
-            const db = getActiveDb();
+            const select = document.getElementById('trade-duck-select'); select.innerHTML = ''; const db = getActiveDb();
             gameState.inventory.forEach(item => {
-                const base = db[item.id];
-                if(!base) return;
-                const opt = document.createElement('option'); opt.value = item.uid;
-                opt.innerText = `${base.avatar} ${base.name} (Ур. ${item.lvl})`;
+                const base = db[item.id]; if(!base) return;
+                const opt = document.createElement('option'); opt.value = item.uid; opt.innerText = `${base.avatar} ${base.name} (Ур. ${item.lvl})`;
                 select.appendChild(opt);
             });
         }
 
         function executeTrade() {
-            const fId = document.getElementById('friend-id-input').value.trim();
-            if (!fId.startsWith('ID-') || fId.length < 5) { alert('Укажите ID партнера по обмену!'); return; }
-            if (gameState.inventory.length <= 1) { alert('Нельзя обменять последнего воина!'); return; }
-
-            const select = document.getElementById('trade-duck-select');
-            const targetUid = select.value;
-            if (!targetUid) return;
-
+            if (gameState.inventory.length <= 1) { alert('Нельзя отдать последнюю утку!'); return; }
+            const select = document.getElementById('trade-duck-select'); const targetUid = select.value; if (!targetUid) return;
             gameState.inventory = gameState.inventory.filter(i => i.uid !== targetUid);
             gameState.teamUids = gameState.teamUids.filter(tUid => tUid !== targetUid);
-
-            const db = getActiveDb();
-            let keys = Object.keys(db);
-            let seed = parseInt(fId.replace('ID-', '')) || 404;
-            let rolledId = keys[seed % keys.length];
-
+            const db = getActiveDb(); let keys = Object.keys(db);
+            let rolledId = keys[Math.floor(Math.random() * keys.length)];
             gameState.inventory.push({ uid: 'u_trade_' + Date.now(), id: rolledId, lvl: 1, xp: 0 });
-            alert(`🔄 Трейд завершен! Нанят агент: ${db[rolledId].avatar} ${db[rolledId].name}!`);
+            alert(`🔄 Межфракционный обмен завершен! Получен агент: ${db[rolledId].name}!`);
             setupTradeSelect(); updateUI(); saveGame();
-        }
-
-        function startFriendBattle() {
-            const inputVal = document.getElementById('friend-id-input').value.trim();
-            if (!inputVal.startsWith('ID-') || inputVal.length < 5) { alert('Неверный код оппонента!'); return; }
-            switchTab('levels'); startBattleCore('friend', inputVal);
         }
 
         window.onload = loadGame;
