@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Мир Монстров: Арена и Друзья</title>
+    <title>Супер-Утки: Лига Супергероев</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #1a1a1f;
+            background-color: #11141a;
             color: #ffffff;
             display: flex;
             flex-direction: column;
@@ -19,13 +19,14 @@
         }
 
         header {
-            background-color: #25252b;
+            background-color: #1b222c;
             width: 100%;
             text-align: center;
             padding: 12px 0;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
             font-size: 18px;
             font-weight: bold;
+            border-bottom: 2px solid #ffbc00;
         }
 
         .container {
@@ -38,31 +39,32 @@
         }
 
         .card {
-            background-color: #25252b;
+            background-color: #1b222c;
             border-radius: 16px;
             padding: 15px;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
             margin-bottom: 15px;
+            border: 1px solid #2c3848;
         }
 
         button {
-            background-color: #ff9f43;
-            color: white;
+            background-color: #ffbc00;
+            color: #000;
             border: none;
             border-radius: 10px;
             padding: 12px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 0 #d35400;
+            box-shadow: 0 4px 0 #b38400;
         }
         button:active { transform: translateY(4px); box-shadow: none; }
 
         input {
             width: 100%;
             padding: 12px;
-            background: #2f2f38;
-            border: 2px solid #4e4e5a;
+            background: #252f3d;
+            border: 2px solid #3d4d63;
             border-radius: 10px;
             color: white;
             font-size: 16px;
@@ -71,7 +73,7 @@
             text-align: center;
         }
 
-        .rare { color: #54a0ff; } .super-rare { color: #5f27cd; } .epic { color: #ff00ff; } .legendary { color: #f1c40f; }
+        .rare { color: #54a0ff; } .super-rare { color: #a55eea; } .epic { color: #ff4757; } .legendary { color: #ffbc00; }
 
         .monster-grid {
             display: grid;
@@ -81,19 +83,19 @@
         }
 
         .monster-card {
-            background: #2f2f38;
-            border: 3px solid #4e4e5a;
+            background: #252f3d;
+            border: 3px solid #3d4d63;
             border-radius: 12px;
             padding: 8px;
             text-align: center;
             cursor: pointer;
         }
-        .monster-card.selected { border-color: #2ecc71; background: #223e2b; }
-        .monster-avatar { font-size: 36px; margin-bottom: 5px; }
+        .monster-card.selected { border-color: #ffbc00; background: #2c321d; }
+        .monster-avatar { font-size: 38px; margin-bottom: 5px; }
         .monster-name { font-size: 11px; font-weight: bold; }
 
         .capsule-item {
-            background: #2f2f38;
+            background: #252f3d;
             border-radius: 12px;
             padding: 12px;
             margin-bottom: 10px;
@@ -110,7 +112,7 @@
             overflow-y: auto;
         }
         .level-badge {
-            background: #2f2f38;
+            background: #252f3d;
             padding: 10px 0;
             border-radius: 8px;
             text-align: center;
@@ -118,17 +120,17 @@
             font-size: 14px;
             cursor: pointer;
         }
-        .level-badge.unlocked { background: #10ac84; color: white; }
+        .level-badge.unlocked { background: #00d2d3; color: black; }
         .level-badge.locked { opacity: 0.3; cursor: not-allowed; }
 
-        /* ВИЗУАЛЬНОЕ ПОЛЕ БОЯ */
+        /* СУПЕРГЕРОЙСКОЕ ПОЛЕ БОЯ */
         .battle-field {
-            background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(180deg, #10141d 0%, #2c3e50 100%);
             border-radius: 16px;
             height: 240px;
             position: relative;
             overflow: hidden;
-            border: 3px solid #ff4757;
+            border: 3px solid #ffbc00;
             display: flex;
             justify-content: space-between;
             padding: 20px;
@@ -152,27 +154,27 @@
             cursor: pointer;
             transition: transform 0.2s;
         }
-        .field-unit.active-choice { transform: scale(1.15); filter: drop-shadow(0 0 8px #fff); }
+        .field-unit.active-choice { transform: scale(1.2); filter: drop-shadow(0 0 10px #ffbc00); }
         .field-unit.dead { opacity: 0.2; filter: grayscale(1); pointer-events: none; }
         
-        .field-avatar { font-size: 42px; }
+        .field-avatar { font-size: 44px; }
         
         .field-hp-bar-bg {
-            background: #555;
-            width: 50px;
+            background: #444;
+            width: 55px;
             height: 6px;
             border-radius: 3px;
             overflow: hidden;
             margin-top: 4px;
         }
-        .field-hp-bar { background: #2ecc71; height: 100%; width: 100%; transition: width 0.2s; }
+        .field-hp-bar { background: #10ac84; height: 100%; width: 100%; transition: width 0.2s; }
         .field-unit.enemy .field-hp-bar { background: #ff4757; }
 
         .damage-pop {
             position: absolute;
             color: #ff4757;
             font-weight: bold;
-            font-size: 20px;
+            font-size: 22px;
             animation: popUp 0.8s ease-out forwards;
             pointer-events: none;
             z-index: 10;
@@ -180,15 +182,16 @@
         }
         @keyframes popUp {
             0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-30px) scale(1.3); }
+            100% { opacity: 0; transform: translateY(-35px) scale(1.4); }
         }
 
         .skills-panel {
-            background: #111;
-            padding: 10px;
+            background: #0d1117;
+            padding: 12px;
             border-radius: 12px;
             margin-top: 10px;
             text-align: center;
+            border: 1px solid #ffbc00;
         }
         .skills-grid {
             display: grid;
@@ -199,56 +202,56 @@
 
         .bottom-nav {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 100%; max-width: 500px; background-color: #25252b;
+            width: 100%; max-width: 500px; background-color: #1b222c;
             display: flex; justify-content: space-around; padding: 12px 0;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.4); border-top: 2px solid #3e3e4a; z-index: 100;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.5); border-top: 2px solid #2c3848; z-index: 100;
         }
-        .nav-btn { background-color: #341f97; box-shadow: 0 3px 0 #1e1250; padding: 10px; font-size: 14px; width: 22%; }
+        .nav-btn { background-color: #252f3d; color: white; box-shadow: 0 3px 0 #151c24; padding: 10px; font-size: 14px; width: 22%; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <header>
-        Монет: <span id="coins-display">100</span> 🪙
+        Супер-Монеты: <span id="coins-display">100</span> 🪙
     </header>
 
     <div class="container">
         
         <div id="tab-home" class="tab-content">
             <div class="card" style="text-align: center;">
-                <h2>🏠 Твой Отряд</h2>
-                <p style="font-size: 13px; color: #aaa;">Твой уникальный ID-код для друзей:</p>
-                <h3 id="my-id-display" style="color: #ff9f43; letter-spacing: 2px; margin: 5px 0;">ID-0000</h3>
-                <p style="font-size: 12px; color: #888;">Выбери ровно 3 персонажей в бой:</p>
+                <h2>🦆 Штаб Супер-Уток</h2>
+                <p style="font-size: 13px; color: #aaa;">Твой Код Отряда для дуэли с друзьями:</p>
+                <h3 id="my-id-display" style="color: #ffbc00; letter-spacing: 2px; margin: 5px 0;">ID-0000</h3>
+                <p style="font-size: 12px; color: #9aa0a6;">Выбери 3 уток-супергероев на Арену:</p>
                 <div id="home-monsters-grid" class="monster-grid"></div>
             </div>
         </div>
 
         <div id="tab-shop" class="tab-content hidden">
             <div class="card">
-                <h2>🛒 Капсулы Редкости</h2>
+                <h2>🛒 Секретные Капсулы</h2>
                 <div id="capsules-market"></div>
             </div>
         </div>
 
         <div id="tab-levels" class="tab-content hidden">
             <div id="levels-selection-card" class="card">
-                <h2>🗺️ Выбор Уровня</h2>
+                <h2>🗺️ Зачистка Прудов (50 Уровней)</h2>
                 <div id="levels-badge-container" class="level-badge-grid"></div>
             </div>
 
             <div id="battle-field-card" class="card hidden">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span id="turn-indicator" style="font-weight:bold; color:#ff9f43;">Ход Противника...</span>
-                    <span id="location-title" style="font-size:12px; color:#aaa;">Арена</span>
+                    <span id="turn-indicator" style="font-weight:bold; color:#ffbc00;">Ход супер-злодеев...</span>
+                    <span id="location-title" style="font-size:12px; color:#aaa;">Сектор Боя</span>
                 </div>
                 <div id="battle-arena" class="battle-field">
                     <div id="player-side" class="field-side"></div>
                     <div id="enemy-side" class="field-side"></div>
                 </div>
                 <div id="skills-control" class="skills-panel hidden">
-                    <span id="selected-hero-name" style="font-size:13px; font-weight:bold; color:#2ecc71;">Выбери атаку:</span>
+                    <span id="selected-hero-name" style="font-size:13px; font-weight:bold; color:#ffbc00;">Супер-Атака:</span>
                     <div id="skills-buttons" class="skills-grid"></div>
                 </div>
             </div>
@@ -256,43 +259,45 @@
 
         <div id="tab-friends" class="tab-content hidden">
             <div id="friends-main-card" class="card" style="text-align: center;">
-                <h2>⚔️ Вызов Друга</h2>
-                <p style="font-size: 13px; color: #aaa;">Введи ID-код своего друга, чтобы сразиться с его отрядом из 3 монстров!</p>
-                <input type="text" id="friend-id-input" placeholder="Например: ID-4829">
-                <button style="width: 100%;" onclick="startFriendBattle()">Бросить Вызов!</button>
+                <h2>⚔️ Битва по Коду</h2>
+                <p style="font-size: 13px; color: #aaa;">Введи ID-код друга, чтобы проверить, чьи утки круче!</p>
+                <input type="text" id="friend-id-input" placeholder="ID-1234">
+                <button style="width: 100%;" onclick="startFriendBattle()">Вызвать на Дуэль!</button>
             </div>
         </div>
 
     </div>
 
     <div class="bottom-nav">
-        <button class="nav-btn" style="background-color: #ff9f43; box-shadow: 0 3px 0 #d35400;" onclick="switchTab('home')">Отряд</button>
-        <button class="nav-btn" style="background-color: #a55eea; box-shadow: 0 3px 0 #8854d0;" onclick="switchTab('shop')">Капсулы</button>
-        <button class="nav-btn" style="background-color: #10ac84; box-shadow: 0 3px 0 #0f8f6d;" onclick="switchTab('levels')">Битва</button>
-        <button class="nav-btn" style="background-color: #ff4757; box-shadow: 0 3px 0 #ee5253;" onclick="switchTab('friends')">Друзья</button>
+        <button class="nav-btn" style="background-color: #ffbc00; color: black; box-shadow: 0 3px 0 #b38400;" onclick="switchTab('home')">Штаб</button>
+        <button class="nav-btn" onclick="switchTab('shop')">Капсулы</button>
+        <button class="nav-btn" onclick="switchTab('levels')">Арена</button>
+        <button class="nav-btn" onclick="switchTab('friends')">Друзья</button>
     </div>
 
     <script>
         const monsterDatabase = {
-            slime:    { name: 'Слизень', rarity: 'rare', hp: 90, avatar: '🟢', skills: [{n: 'Плевок', d: 15}, {n: 'Слизь', d: 22}] },
-            goblin:   { name: 'Гоблин',   rarity: 'rare', hp: 85, avatar: '👺', skills: [{n: 'Кража', d: 18}, {n: 'Нож', d: 25}] },
-            dragon:   { name: 'Дракон',   rarity: 'super-rare', hp: 130, avatar: '🐉', skills: [{n: 'Пламя', d: 28}, {n: 'Когти', d: 35}] },
-            wizard:   { name: 'Маг',      rarity: 'super-rare', hp: 110, avatar: '🧙‍♂️', skills: [{n: 'Лед', d: 24}, {n: 'Разряд', d: 38}] },
-            golem:    { name: 'Голем',    rarity: 'epic', hp: 210, avatar: '🗿', skills: [{n: 'Таран', d: 20}, {n: 'Обвал', d: 30}] },
-            pekka:    { name: 'Рыцарь',   rarity: 'epic', hp: 170, avatar: '🤖', skills: [{n: 'Меч', d: 35}, {n: 'Сокрушение', d: 50}] },
-            phoenix:  { name: 'Феникс',   rarity: 'legendary', hp: 250, avatar: '🦅', skills: [{n: 'Взрыв', d: 45}, {n: 'Пике', d: 60}] }
+            spiderDuck:  { name: 'Утка-Паук',    rarity: 'rare', hp: 90, avatar: '🕸️', skills: [{n: 'Паутина', d: 16}, {n: 'Удар крылом', d: 24}] },
+            capDuck:     { name: 'Утка-Капитан',  rarity: 'rare', hp: 95, avatar: '🛡️', skills: [{n: 'Бросок щита', d: 18}, {n: 'Кряк Свободы', d: 22}] },
+            ironDuck:    { name: 'Железный Селезень', rarity: 'super-rare', hp: 120, avatar: '🤖', skills: [{n: 'Лазер из клюва', d: 28}, {n: 'Ракетный залп', d: 38}] },
+            thorDuck:    { name: 'Утка-Тор',     rarity: 'super-rare', hp: 130, avatar: '⚡', skills: [{n: 'Молот Грозы', d: 30}, {n: 'Призыв молнии', d: 42}] },
+            hulkDuck:    { name: 'Халк-Утка',    rarity: 'epic', hp: 220, avatar: '🟢', skills: [{n: 'Халк КРЯК!', d: 20}, {n: 'Сломать пруд', d: 35}] },
+            batDuck:     { name: 'Бэт-Утка',     rarity: 'epic', hp: 160, avatar: '🦇', skills: [{n: 'Бэтранг', d: 36}, {n: 'Плащ Ночи', d: 48}] },
+            cyborgDuck:  { name: 'Киборг-Утка',  rarity: 'legendary', hp: 260, avatar: '🦾', skills: [{n: 'Кибер-таран', d: 45}, {n: 'Фотонный кряк', d: 65}] }
         };
 
         const capsulesConfig = [
-            { id: 'rare', name: 'Редкая Капсула', price: 30, textClass: 'rare', contains: ['slime', 'goblin'] },
-            { id: 'super-rare', name: 'Сверхредкая Капсула', price: 70, textClass: 'super-rare', contains: ['dragon', 'wizard'] },
-            { id: 'epic', name: 'Эпическая Капсула', price: 150, textClass: 'epic', contains: ['golem', 'pekka'] },
-            { id: 'legendary', name: 'Легендарная Капсула', price: 350, textClass: 'legendary', contains: ['phoenix'] }
+            { id: 'rare', name: 'Редкая Утка', price: 30, textClass: 'rare', contains: ['spiderDuck', 'capDuck'] },
+            { id: 'super-rare', name: 'Сверхредкая Утка', price: 70, textClass: 'super-rare', contains: ['ironDuck', 'thorDuck'] },
+            { id: 'epic', name: 'Эпическая Утка', price: 150, textClass: 'epic', contains: ['hulkDuck', 'batDuck'] },
+            { id: 'legendary', name: 'ЛЕГЕНДАРНАЯ УТКА', price: 350, textClass: 'legendary', contains: ['cyborgDuck'] }
         ];
+
+        const locations = ['🌾 Чистый Пруд', '🏭 Сточные Воды', '🌆 Крыши Готэма', '🌌 Космическая Станция', '🌋 База Суперзлодеев'];
 
         let gameState = {
             coins: 100,
-            ownedIds: ['slime', 'goblin'],
+            ownedIds: ['spiderDuck', 'capDuck'], 
             team: [],
             currentLevel: 1,
             myId: ''
@@ -301,21 +306,16 @@
         let battleState = null;
 
         function loadGame() {
-            const saved = localStorage.getItem('lego_rivals_friends_v2');
+            const saved = localStorage.getItem('super_ducks_heroes_v1');
             if (saved) gameState = JSON.parse(saved);
-            
-            // Если ID еще нет, создаем уникальный случайный код
-            if (!gameState.myId) {
-                gameState.myId = 'ID-' + Math.floor(1000 + Math.random() * 9000);
-            }
-            
+            if (!gameState.myId) gameState.myId = 'ID-' + Math.floor(1000 + Math.random() * 9000);
             document.getElementById('my-id-display').innerText = gameState.myId;
             updateUI();
             renderCapsules();
         }
 
         function saveGame() {
-            localStorage.setItem('lego_rivals_friends_v2', JSON.stringify(gameState));
+            localStorage.setItem('super_ducks_heroes_v1', JSON.stringify(gameState));
         }
 
         function switchTab(tabName) {
@@ -339,7 +339,7 @@
                 div.className = 'capsule-item';
                 div.innerHTML = `
                     <div><span class="${c.textClass}" style="font-weight:bold;">${c.name}</span><br><small>Цена: ${c.price} 🪙</small></div>
-                    <button style="padding:6px 12px; font-size:13px; background:#2ecc71; box-shadow:0 3px 0 #27ae60;" onclick="buyCapsule('${c.id}')">Купить</button>
+                    <button style="padding:6px 12px; font-size:13px; background:#ffbc00; color:black; box-shadow:0 3px 0 #b38400;" onclick="buyCapsule('${c.id}')">Открыть</button>
                 `;
                 container.appendChild(div);
             });
@@ -351,11 +351,11 @@
                 gameState.coins -= conf.price;
                 const rId = conf.contains[Math.floor(Math.random() * conf.contains.length)];
                 if (!gameState.ownedIds.includes(rId)) gameState.ownedIds.push(rId);
-                alert(`🎉 Выпал персонаж: ${monsterDatabase[rId].name}!`);
+                alert(`💥 Новая утка в отряде: ${monsterDatabase[rId].name}!`);
                 updateUI();
                 saveGame();
             } else {
-                alert('Мало монет!');
+                alert('Не хватает супер-монет!');
             }
         }
 
@@ -383,7 +383,7 @@
                 gameState.team.splice(idx, 1);
             } else {
                 if (gameState.team.length >= 3) {
-                    alert('Максимум 3 персонажа в поле боя!');
+                    alert('В отряд можно взять максимум 3 утки!');
                     return;
                 }
                 gameState.team.push(id);
@@ -405,24 +405,20 @@
             }
         }
 
-        // БИТВА С ДРУГОМ ПО ID-КОДУ
         function startFriendBattle() {
             const inputVal = document.getElementById('friend-id-input').value.trim();
             if (!inputVal.startsWith('ID-') || inputVal.length < 5) {
-                alert('Неверный формат кода! Введи, например: ID-1234');
+                alert('Введите правильный код друга! (Пример: ID-1234)');
                 return;
             }
             if (gameState.team.length === 0) {
-                alert('Сначала выбери до 3 персонажей в свой отряд!');
+                alert('Выбери супер-уток в штабе!');
                 return;
             }
-            
-            // Переключаемся на вкладку битвы и запускаем дуэль
             switchTab('levels');
             startBattleCore('friend', inputVal);
         }
 
-        // ОБЩЕЕ ЯДРО ДЛЯ ЗАПУСКА И ЛЕВЕЛОВ, И ДРУЗЕЙ
         function startBattleCore(mode, targetData) {
             document.getElementById('levels-selection-card').classList.add('hidden');
             document.getElementById('battle-field-card').classList.remove('hidden');
@@ -436,28 +432,28 @@
             let enemyUnits = [];
 
             if (mode === 'level') {
-                document.getElementById('location-title').innerText = `Кампания: Уровень ${targetData}`;
-                let enemyHp = 60 + (targetData * 25);
-                let enemyDmg = 12 + (targetData * 4);
+                document.getElementById('location-title').innerText = `Уровень ${targetData}`;
+                let enemyHp = 60 + (targetData * 26);
+                let enemyDmg = 10 + (targetData * 4);
                 let locIdx = Math.min(4, Math.floor((targetData - 1) / 10));
+                
+                let enemyAvatars = ['🦢', '🦤', '🦅', '🦉', '🦖'];
                 enemyUnits = [{
-                    uid: 'e_0', name: 'Босс Уровня',
-                    avatar: ['👹', '🧛', '🐺', '🐉', '💀'][locIdx],
-                    hp: enemyHp, maxHp: enemyHp, dmg: enemyDmg, isFriendBot: false
+                    uid: 'e_0', name: 'Злобный Гусь-Босс',
+                    avatar: enemyAvatars[locIdx],
+                    hp: enemyHp, maxHp: enemyHp, dmg: enemyDmg
                 }];
             } else if (mode === 'friend') {
                 document.getElementById('location-title').innerText = `Дуэль против ${targetData}`;
-                // Имитируем команду друга на основе его ID
-                // Чтобы у разных ID были разные случайные монстры
-                let seed = parseInt(targetData.replace('ID-', '')) || 5555;
+                let seed = parseInt(targetData.replace('ID-', '')) || 7777;
                 let keys = Object.keys(monsterDatabase);
                 
                 for(let i=0; i<3; i++) {
                     let mId = keys[(seed + i) % keys.length];
                     let m = monsterDatabase[mId];
                     enemyUnits.push({
-                        uid: 'e_' + i, name: 'Герой Друга', avatar: m.avatar,
-                        hp: m.hp, maxHp: m.hp, dmg: Math.floor(m.skills[0].d * 0.9), isFriendBot: true
+                        uid: 'e_' + i, name: 'Утка Друга', avatar: m.avatar,
+                        hp: m.hp, maxHp: m.hp, dmg: Math.floor(m.skills[0].d * 0.95)
                     });
                 }
             }
@@ -492,7 +488,7 @@
 
         function executeEnemyTurn() {
             if (!battleState) return;
-            document.getElementById('turn-indicator').innerText = 'Ход Противника...';
+            document.getElementById('turn-indicator').innerText = 'Ход Врага...';
             document.getElementById('turn-indicator').style.color = '#ff4757';
             document.getElementById('skills-control').classList.add('hidden');
 
@@ -500,7 +496,6 @@
             let aliveEnemies = battleState.enemy.filter(u => u.hp > 0);
 
             if (alivePlayers.length > 0 && aliveEnemies.length > 0) {
-                // Случайный живой враг бьет случайного живого игрока
                 let attacker = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
                 let target = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
                 
@@ -511,15 +506,15 @@
                 renderField();
 
                 if (battleState.player.filter(u => u.hp > 0).length === 0) {
-                    alert('💀 Твой отряд полностью разбит!');
+                    alert('💀 Команда супер-уток пала! Открой новые капсулы.');
                     closeBattleField();
                     return;
                 }
             }
 
             battleState.phase = 'player_turn';
-            document.getElementById('turn-indicator').innerText = 'ТВОЙ ХОД! Жми на своего бойца';
-            document.getElementById('turn-indicator').style.color = '#2ecc71';
+            document.getElementById('turn-indicator').innerText = 'ТВОЙ ХОД! Жми на свою утку';
+            document.getElementById('turn-indicator').style.color = '#00d2d3';
             renderField();
         }
 
@@ -527,13 +522,13 @@
             battleState.selectedPlayerUid = uid;
             renderField();
             const unit = battleState.player.find(u => u.uid === uid);
-            document.getElementById('selected-hero-name').innerText = `Способности ${unit.avatar}:`;
+            document.getElementById('selected-hero-name').innerText = `Супер-Удары ${unit.avatar}:`;
             
             const skillsContainer = document.getElementById('skills-buttons');
             skillsContainer.innerHTML = '';
             unit.skills.forEach(skill => {
                 const b = document.createElement('button');
-                b.style.fontSize = '13px'; b.style.background = '#341f97'; b.style.boxShadow = '0 3px 0 #1e1250';
+                b.style.fontSize = '13px'; b.style.background = '#252f3d'; b.style.color = '#ffbc00'; b.style.boxShadow = '0 3px 0 #151c24';
                 b.innerHTML = `${skill.n}<br><small>${skill.d} DMG</small>`;
                 b.onclick = () => useSkill(unit, skill);
                 skillsContainer.appendChild(b);
@@ -545,7 +540,6 @@
             let aliveEnemies = battleState.enemy.filter(u => u.hp > 0);
             if (aliveEnemies.length === 0) return;
 
-            // Бьем первого живого врага в ряду
             let target = aliveEnemies[0];
             target.hp -= skill.d;
             if (target.hp < 0) target.hp = 0;
@@ -556,13 +550,13 @@
             renderField();
 
             if (battleState.enemy.filter(u => u.hp > 0).length === 0) {
-                let prize = battleState.mode === 'level' ? (50 + (battleState.lvl * 20)) : 200; // Фиксированный куш за друга
+                let prize = battleState.mode === 'level' ? (50 + (battleState.lvl * 25)) : 250; 
                 gameState.coins += prize;
                 
                 if (battleState.mode === 'level' && battleState.lvl === gameState.currentLevel && gameState.currentLevel < 50) {
                     gameState.currentLevel++;
                 }
-                alert(`🏆 ПОБЕДА НА АРЕНЕ!\nНаграда: +${prize} 🪙`);
+                alert(`🏆 ПОБЕДА УТОК!\nПолучено супер-монет: +${prize} 🪙`);
                 closeBattleField();
                 return;
             }
