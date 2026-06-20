@@ -3,237 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Мир Монстров: 50 Уровней</title>
+    <title>Мир Монстров: Арена и Друзья</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #1e1e24;
+            background-color: #1a1a1f;
             color: #ffffff;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
             user-select: none;
-            -webkit-user-select: none;
         }
 
         header {
-            background-color: #2a2a32;
+            background-color: #25252b;
             width: 100%;
             text-align: center;
-            padding: 15px 0;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            font-size: 20px;
+            padding: 12px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            font-size: 18px;
             font-weight: bold;
-            position: sticky;
-            top: 0;
-            z-index: 10;
         }
 
         .container {
             flex: 1;
             width: 100%;
             max-width: 500px;
-            padding: 20px;
+            padding: 15px;
             box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
             padding-bottom: 110px;
         }
 
         .card {
-            background-color: #2a2a32;
-            border-radius: 12px;
+            background-color: #25252b;
+            border-radius: 16px;
             padding: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
         }
 
         button {
             background-color: #ff9f43;
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 15px 20px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            transition: transform 0.1s, background-color 0.2s;
-            box-shadow: 0 4px 0 #d35400;
-        }
-
-        button:active {
-            transform: translateY(4px);
-            box-shadow: none;
-        }
-
-        .rare { color: #54a0ff; font-weight: bold; }
-        .super-rare { color: #5f27cd; font-weight: bold; }
-        .epic { color: #ff00ff; font-weight: bold; }
-        .legendary { color: #f1c40f; font-weight: bold; }
-
-        .home-monster-card {
-            background: #222f3e;
-            border: 2px solid #3e3e4a;
             border-radius: 10px;
             padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #d35400;
+        }
+        button:active { transform: translateY(4px); box-shadow: none; }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #2f2f38;
+            border: 2px solid #4e4e5a;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .rare { color: #54a0ff; } .super-rare { color: #5f27cd; } .epic { color: #ff00ff; } .legendary { color: #f1c40f; }
+
+        .monster-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
             margin-top: 10px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
         }
-        
-        .monster-avatar {
-            font-size: 40px;
-            background: #2a2a32;
-            padding: 10px;
+
+        .monster-card {
+            background: #2f2f38;
+            border: 3px solid #4e4e5a;
             border-radius: 12px;
-            border: 3px solid #3e3e4a;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
         }
-        
-        .b-rare { border-color: #54a0ff; }
-        .b-super-rare { border-color: #5f27cd; }
-        .b-epic { border-color: #ff00ff; }
-        .b-legendary { border-color: #f1c40f; }
+        .monster-card.selected { border-color: #2ecc71; background: #223e2b; }
+        .monster-avatar { font-size: 36px; margin-bottom: 5px; }
+        .monster-name { font-size: 11px; font-weight: bold; }
 
         .capsule-item {
-            background: #222f3e;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
+            background: #2f2f38;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 6px solid #fff;
         }
-        .capsule-item.c-rare { border-left-color: #54a0ff; }
-        .capsule-item.c-super { border-left-color: #5f27cd; }
-        .capsule-item.c-epic { border-left-color: #ff00ff; }
-        .capsule-item.c-legendary { border-left-color: #f1c40f; }
 
-        /* Оформление локаций на карте уровней */
-        .location-header {
-            background: #ff9f43;
-            color: #000;
-            padding: 8px;
-            border-radius: 6px;
+        .level-badge-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .level-badge {
+            background: #2f2f38;
+            padding: 10px 0;
+            border-radius: 8px;
+            text-align: center;
             font-weight: bold;
             font-size: 14px;
-            margin: 15px 0 8px 0;
-            text-align: center;
+            cursor: pointer;
         }
+        .level-badge.unlocked { background: #10ac84; color: white; }
+        .level-badge.locked { opacity: 0.3; cursor: not-allowed; }
 
-        .level-block {
+        /* ВИЗУАЛЬНОЕ ПОЛЕ БОЯ */
+        .battle-field {
+            background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
+            border-radius: 16px;
+            height: 240px;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #ff4757;
             display: flex;
             justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
             align-items: center;
-            background: #222f3e;
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border-left: 5px solid #57606f;
-        }
-        .level-block.unlocked { border-left-color: #10ac84; }
-        .level-block.locked { opacity: 0.5; }
-
-        .battle-ui {
-            background: #111;
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid #ff4757;
-            text-align: center;
         }
 
-        .battle-vs {
+        .field-side {
             display: flex;
-            justify-content: space-around;
+            flex-direction: column;
+            gap: 15px;
+            justify-content: center;
+            width: 35%;
+        }
+
+        .field-unit {
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            margin-bottom: 15px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
         }
-
-        .fighter-box {
-            text-align: center;
-            width: 45%;
-        }
-
-        .hp-bar-container {
+        .field-unit.active-choice { transform: scale(1.15); filter: drop-shadow(0 0 8px #fff); }
+        .field-unit.dead { opacity: 0.2; filter: grayscale(1); pointer-events: none; }
+        
+        .field-avatar { font-size: 42px; }
+        
+        .field-hp-bar-bg {
             background: #555;
-            border-radius: 5px;
-            width: 100%;
-            height: 12px;
-            margin-top: 5px;
+            width: 50px;
+            height: 6px;
+            border-radius: 3px;
             overflow: hidden;
+            margin-top: 4px;
+        }
+        .field-hp-bar { background: #2ecc71; height: 100%; width: 100%; transition: width 0.2s; }
+        .field-unit.enemy .field-hp-bar { background: #ff4757; }
+
+        .damage-pop {
+            position: absolute;
+            color: #ff4757;
+            font-weight: bold;
+            font-size: 20px;
+            animation: popUp 0.8s ease-out forwards;
+            pointer-events: none;
+            z-index: 10;
+            text-shadow: 0 2px 4px #000;
+        }
+        @keyframes popUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-30px) scale(1.3); }
         }
 
-        .hp-bar {
-            background: #2ecc71;
-            height: 100%;
-            width: 100%;
-            transition: width 0.3s;
+        .skills-panel {
+            background: #111;
+            padding: 10px;
+            border-radius: 12px;
+            margin-top: 10px;
+            text-align: center;
         }
-
-        .action-buttons {
+        .skills-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-top: 15px;
-        }
-
-        .action-btn {
-            background-color: #341f97;
-            box-shadow: 0 4px 0 #1e1250;
-            font-size: 14px;
-            padding: 12px 5px;
-        }
-
-        .battle-log {
-            background-color: #000;
-            border-radius: 8px;
-            padding: 10px;
-            height: 120px;
-            overflow-y: auto;
-            font-family: monospace;
-            font-size: 12px;
-            color: #00ff00;
-            margin-top: 15px;
-            text-align: left;
+            margin-top: 5px;
         }
 
         .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 500px;
-            background-color: #2a2a32;
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.4);
-            border-top: 2px solid #3e3e4a;
-            z-index: 100;
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 500px; background-color: #25252b;
+            display: flex; justify-content: space-around; padding: 12px 0;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.4); border-top: 2px solid #3e3e4a; z-index: 100;
         }
-
-        .nav-btn {
-            background-color: #341f97;
-            box-shadow: 0 3px 0 #1e1250;
-            padding: 10px;
-            font-size: 14px;
-            width: 22%;
-        }
-
-        .hidden {
-            display: none !important;
-        }
+        .nav-btn { background-color: #341f97; box-shadow: 0 3px 0 #1e1250; padding: 10px; font-size: 14px; width: 22%; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -245,331 +216,377 @@
     <div class="container">
         
         <div id="tab-home" class="tab-content">
-            <div class="card" style="text-align: center; margin-bottom: 15px;">
-                <h2>🏠 Твой Дом</h2>
-                <p>Здесь живут твои монстры. Твоя общая выживаемость на Уровнях зависит от количества прирученных бойцов!</p>
-            </div>
-            
-            <div class="card">
-                <h3>Твоя коллекция монстров:</h3>
-                <div id="home-monsters-list">У тебя пока нет монстров. Открой капсулы в Магазине!</div>
+            <div class="card" style="text-align: center;">
+                <h2>🏠 Твой Отряд</h2>
+                <p style="font-size: 13px; color: #aaa;">Твой уникальный ID-код для друзей:</p>
+                <h3 id="my-id-display" style="color: #ff9f43; letter-spacing: 2px; margin: 5px 0;">ID-0000</h3>
+                <p style="font-size: 12px; color: #888;">Выбери ровно 3 персонажей в бой:</p>
+                <div id="home-monsters-grid" class="monster-grid"></div>
             </div>
         </div>
 
         <div id="tab-shop" class="tab-content hidden">
             <div class="card">
-                <h2>🛒 Магазин Капсул</h2>
-                <p style="font-size: 13px; color: #aaa; margin-bottom: 20px;">Покупай капсулы, чтобы пополнить армию и одолеть боссов на поздних локациях!</p>
+                <h2>🛒 Капсулы Редкости</h2>
                 <div id="capsules-market"></div>
             </div>
         </div>
 
         <div id="tab-levels" class="tab-content hidden">
-            <div class="card">
-                <h2>🗺️ Большая Карта: 50 Уровней</h2>
-                <p>Каждые 10 уровней меняется локация и босс. Пройди их все!</p>
-                
-                <div id="levels-list" style="max-height: 400px; overflow-y: auto; padding-right: 5px;"></div>
+            <div id="levels-selection-card" class="card">
+                <h2>🗺️ Выбор Уровня</h2>
+                <div id="levels-badge-container" class="level-badge-grid"></div>
+            </div>
 
-                <div id="level-battle-zone" class="hidden" style="margin-top: 15px;">
-                    <div class="battle-ui">
-                        <div class="battle-vs">
-                            <div class="fighter-box">
-                                <div id="p-avatar" class="monster-avatar" style="margin: 0 auto;">🛡️</div>
-                                <b id="p-name">Твоя Армия</b>
-                                <div class="hp-bar-container"><div id="p-hp-bar" class="hp-bar"></div></div>
-                                <span id="p-hp-text">100/100</span>
-                            </div>
-                            <b style="color: #ff4757; font-size: 24px;">VS</b>
-                            <div class="fighter-box">
-                                <div id="e-avatar" class="monster-avatar" style="margin: 0 auto; border-color:#ee5253;">😈</div>
-                                <b id="e-name">Враг</b>
-                                <div class="hp-bar-container"><div id="e-hp-bar" class="hp-bar" style="background:#ee5253;"></div></div>
-                                <span id="e-hp-text">100/100</span>
-                            </div>
-                        </div>
-
-                        <p style="font-size: 14px; margin: 5px 0; color: #ff9f43;">Выбери атакующего монстра:</p>
-                        <div id="battle-actions-container" class="action-buttons"></div>
-
-                        <div id="level-battle-log" class="battle-log"></div>
-                    </div>
+            <div id="battle-field-card" class="card hidden">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span id="turn-indicator" style="font-weight:bold; color:#ff9f43;">Ход Противника...</span>
+                    <span id="location-title" style="font-size:12px; color:#aaa;">Арена</span>
                 </div>
-
+                <div id="battle-arena" class="battle-field">
+                    <div id="player-side" class="field-side"></div>
+                    <div id="enemy-side" class="field-side"></div>
+                </div>
+                <div id="skills-control" class="skills-panel hidden">
+                    <span id="selected-hero-name" style="font-size:13px; font-weight:bold; color:#2ecc71;">Выбери атаку:</span>
+                    <div id="skills-buttons" class="skills-grid"></div>
+                </div>
             </div>
         </div>
 
-        <div id="tab-battle" class="tab-content hidden">
-            <div class="card" style="text-align: center;">
-                <h2>⚔️ Битва с Друзьями</h2>
-                <p>Режим дуэлей закрыт. Все твои силы нужны на прохождение 50 уровней кампании!</p>
+        <div id="tab-friends" class="tab-content hidden">
+            <div id="friends-main-card" class="card" style="text-align: center;">
+                <h2>⚔️ Вызов Друга</h2>
+                <p style="font-size: 13px; color: #aaa;">Введи ID-код своего друга, чтобы сразиться с его отрядом из 3 монстров!</p>
+                <input type="text" id="friend-id-input" placeholder="Например: ID-4829">
+                <button style="width: 100%;" onclick="startFriendBattle()">Бросить Вызов!</button>
             </div>
         </div>
 
     </div>
 
     <div class="bottom-nav">
-        <button class="nav-btn" style="background-color: #ff9f43; box-shadow: 0 3px 0 #d35400;" onclick="switchTab('home')">Дом</button>
-        <button class="nav-btn" style="background-color: #a55eea; box-shadow: 0 3px 0 #8854d0;" onclick="switchTab('shop')">Магазин</button>
-        <button class="nav-btn" style="background-color: #10ac84; box-shadow: 0 3px 0 #0f8f6d;" onclick="switchTab('levels')">Уровни</button>
-        <button class="nav-btn" style="background-color: #ff4757; box-shadow: 0 3px 0 #ee5253;" onclick="switchTab('battle')">Друзья</button>
+        <button class="nav-btn" style="background-color: #ff9f43; box-shadow: 0 3px 0 #d35400;" onclick="switchTab('home')">Отряд</button>
+        <button class="nav-btn" style="background-color: #a55eea; box-shadow: 0 3px 0 #8854d0;" onclick="switchTab('shop')">Капсулы</button>
+        <button class="nav-btn" style="background-color: #10ac84; box-shadow: 0 3px 0 #0f8f6d;" onclick="switchTab('levels')">Битва</button>
+        <button class="nav-btn" style="background-color: #ff4757; box-shadow: 0 3px 0 #ee5253;" onclick="switchTab('friends')">Друзья</button>
     </div>
 
     <script>
         const monsterDatabase = {
-            slime:    { name: 'Болотный Слизень', rarity: 'rare', hp: 90, dmg: 14, avatar: '🟢' },
-            goblin:   { name: 'Гоблин-Вор',       rarity: 'rare', hp: 80, dmg: 18, avatar: '👺' },
-            dragon:   { name: 'Огненный Дракон',  rarity: 'super-rare', hp: 120, dmg: 25, avatar: '🐉' },
-            wizard:   { name: 'Ледяной Маг',      rarity: 'super-rare', hp: 110, dmg: 22, avatar: '🧙‍♂️' },
-            golem:    { name: 'Каменный Голем',   rarity: 'epic', hp: 200, dmg: 15, avatar: '🗿' },
-            pekka:    { name: 'Стальной Рыцарь',  rarity: 'epic', hp: 160, dmg: 35, avatar: '🤖' },
-            phoenix:  { name: 'Золотой Феникс',   rarity: 'legendary', hp: 250, dmg: 45, avatar: '🦅' }
+            slime:    { name: 'Слизень', rarity: 'rare', hp: 90, avatar: '🟢', skills: [{n: 'Плевок', d: 15}, {n: 'Слизь', d: 22}] },
+            goblin:   { name: 'Гоблин',   rarity: 'rare', hp: 85, avatar: '👺', skills: [{n: 'Кража', d: 18}, {n: 'Нож', d: 25}] },
+            dragon:   { name: 'Дракон',   rarity: 'super-rare', hp: 130, avatar: '🐉', skills: [{n: 'Пламя', d: 28}, {n: 'Когти', d: 35}] },
+            wizard:   { name: 'Маг',      rarity: 'super-rare', hp: 110, avatar: '🧙‍♂️', skills: [{n: 'Лед', d: 24}, {n: 'Разряд', d: 38}] },
+            golem:    { name: 'Голем',    rarity: 'epic', hp: 210, avatar: '🗿', skills: [{n: 'Таран', d: 20}, {n: 'Обвал', d: 30}] },
+            pekka:    { name: 'Рыцарь',   rarity: 'epic', hp: 170, avatar: '🤖', skills: [{n: 'Меч', d: 35}, {n: 'Сокрушение', d: 50}] },
+            phoenix:  { name: 'Феникс',   rarity: 'legendary', hp: 250, avatar: '🦅', skills: [{n: 'Взрыв', d: 45}, {n: 'Пике', d: 60}] }
         };
 
         const capsulesConfig = [
-            { id: 'rare', name: 'Редкая Капсула', price: 30, cssClass: 'c-rare', textClass: 'rare', contains: ['slime', 'goblin'] },
-            { id: 'super-rare', name: 'Сверхредкая Капсула', price: 70, cssClass: 'c-super', textClass: 'super-rare', contains: ['dragon', 'wizard'] },
-            { id: 'epic', name: 'Эпическая Капсула', price: 150, cssClass: 'c-epic', textClass: 'epic', contains: ['golem', 'pekka'] },
-            { id: 'legendary', name: 'ЛЕГЕНДАРНАЯ Капсула', price: 350, cssClass: 'c-legendary', textClass: 'legendary', contains: ['phoenix'] }
-        ];
-
-        // Конфигурация локаций (5 локаций по 10 уровней)
-        const locations = [
-            { name: '🌲 Локация 1: Зеленый Лес', minLvl: 1, maxLvl: 10, bossName: 'Дикий Кентавр', bossAvatar: '🐴' },
-            { name: '🌋 Локация 2: Огненная Гора', minLvl: 11, maxLvl: 20, bossName: 'Адский Цербер', bossAvatar: '🐕' },
-            { name: '❄️ Локация 3: Ледяная Пещера', minLvl: 21, maxLvl: 30, bossName: 'Снежный Йети', bossAvatar: '🦍' },
-            { name: '⚡ Локация 4: Грозовой Пик', minLvl: 31, maxLvl: 40, bossName: 'Грозовой Титан', bossAvatar: '⚡' },
-            { name: '💀 Локация 5: Цитадель Тьмы', minLvl: 41, maxLvl: 50, bossName: 'Лорд Преисподней', bossAvatar: '👑' }
+            { id: 'rare', name: 'Редкая Капсула', price: 30, textClass: 'rare', contains: ['slime', 'goblin'] },
+            { id: 'super-rare', name: 'Сверхредкая Капсула', price: 70, textClass: 'super-rare', contains: ['dragon', 'wizard'] },
+            { id: 'epic', name: 'Эпическая Капсула', price: 150, textClass: 'epic', contains: ['golem', 'pekka'] },
+            { id: 'legendary', name: 'Легендарная Капсула', price: 350, textClass: 'legendary', contains: ['phoenix'] }
         ];
 
         let gameState = {
             coins: 100,
-            ownedIds: [],
-            currentLevel: 1 // Текущий открытый уровень (от 1 до 50)
+            ownedIds: ['slime', 'goblin'],
+            team: [],
+            currentLevel: 1,
+            myId: ''
         };
 
-        let activeBattle = null;
+        let battleState = null;
 
         function loadGame() {
-            const savedData = localStorage.getItem('monster_rpg_50_levels');
-            if (savedData) {
-                gameState = JSON.parse(savedData);
+            const saved = localStorage.getItem('lego_rivals_friends_v2');
+            if (saved) gameState = JSON.parse(saved);
+            
+            // Если ID еще нет, создаем уникальный случайный код
+            if (!gameState.myId) {
+                gameState.myId = 'ID-' + Math.floor(1000 + Math.random() * 9000);
             }
+            
+            document.getElementById('my-id-display').innerText = gameState.myId;
             updateUI();
             renderCapsules();
         }
 
         function saveGame() {
-            localStorage.setItem('monster_rpg_50_levels', JSON.stringify(gameState));
+            localStorage.setItem('lego_rivals_friends_v2', JSON.stringify(gameState));
         }
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             if (tabName === 'home') document.getElementById('tab-home').classList.remove('hidden');
             if (tabName === 'shop') document.getElementById('tab-shop').classList.remove('hidden');
+            if (tabName === 'friends') document.getElementById('tab-friends').classList.remove('hidden');
             if (tabName === 'levels') {
                 document.getElementById('tab-levels').classList.remove('hidden');
-                renderLevels();
+                document.getElementById('levels-selection-card').classList.remove('hidden');
+                document.getElementById('battle-field-card').classList.add('hidden');
+                renderLevelBadges();
             }
-            if (tabName === 'battle') document.getElementById('tab-battle').classList.remove('hidden');
         }
 
         function renderCapsules() {
             const container = document.getElementById('capsules-market');
             container.innerHTML = '';
-            capsulesConfig.forEach(capsule => {
+            capsulesConfig.forEach(c => {
                 const div = document.createElement('div');
-                div.className = `capsule-item ${capsule.cssClass}`;
+                div.className = 'capsule-item';
                 div.innerHTML = `
-                    <div>
-                        <span class="${capsule.textClass}" style="font-size:17px;">${capsule.name}</span><br>
-                        <span style="font-size:13px; color:#aaa;">Цена: <b style="color:#f1c40f;">${capsule.price} 🪙</b></span>
-                    </div>
-                    <button style="width:auto; padding:10px 15px; font-size:14px; background:#2ecc71; box-shadow:0 3px 0 #27ae60;" 
-                        onclick="buyCapsule('${capsule.id}')">Открыть</button>
+                    <div><span class="${c.textClass}" style="font-weight:bold;">${c.name}</span><br><small>Цена: ${c.price} 🪙</small></div>
+                    <button style="padding:6px 12px; font-size:13px; background:#2ecc71; box-shadow:0 3px 0 #27ae60;" onclick="buyCapsule('${c.id}')">Купить</button>
                 `;
                 container.appendChild(div);
             });
         }
 
-        function buyCapsule(capsuleId) {
-            const config = capsulesConfig.find(c => c.id === capsuleId);
-            if (gameState.coins >= config.price) {
-                gameState.coins -= config.price;
-                const list = config.contains;
-                const randomId = list[Math.floor(Math.random() * list.length)];
-                const monster = monsterDatabase[randomId];
-
-                if (!gameState.ownedIds.includes(randomId)) {
-                    gameState.ownedIds.push(randomId);
-                }
-
-                alert(`✨ УСПЕХ! ✨\nИз капсулы получен:\n${monster.avatar} ${monster.name}!`);
+        function buyCapsule(id) {
+            const conf = capsulesConfig.find(c => c.id === id);
+            if (gameState.coins >= conf.price) {
+                gameState.coins -= conf.price;
+                const rId = conf.contains[Math.floor(Math.random() * conf.contains.length)];
+                if (!gameState.ownedIds.includes(rId)) gameState.ownedIds.push(rId);
+                alert(`🎉 Выпал персонаж: ${monsterDatabase[rId].name}!`);
                 updateUI();
                 saveGame();
             } else {
-                alert('Не хватает монет! Проходи уровни кампании.');
+                alert('Мало монет!');
             }
         }
 
         function updateUI() {
             document.getElementById('coins-display').innerText = gameState.coins;
-
-            const homeList = document.getElementById('home-monsters-list');
-            if (gameState.ownedIds.length === 0) {
-                homeList.innerHTML = "У тебя пусто. Открой первую капсулу в <b>Магазине</b>!";
-            } else {
-                homeList.innerHTML = gameState.ownedIds.map(id => {
-                    const m = monsterDatabase[id];
-                    let rLabel = m.rarity === 'rare' ? '<span class="rare">[Редкий]</span>' :
-                                 m.rarity === 'super-rare' ? '<span class="super-rare">[Сверхредкий]</span>' :
-                                 m.rarity === 'epic' ? '<span class="epic">[Эпический]</span>' : '<span class="legendary">[ЛЕГЕНДАРНЫЙ]</span>';
-                    return `
-                        <div class="home-monster-card">
-                            <div class="monster-avatar b-${m.rarity}">${m.avatar}</div>
-                            <div>
-                                <strong>${rLabel} ${m.name}</strong><br>
-                                <span class="stats-text">❤️ HP: ${m.hp} | ⚔️ Атака: ${m.dmg}</span>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-        }
-
-        // ГЕНЕРАЦИЯ 50 УРОВНЕЙ С РАЗДЕЛЕНИЕМ ПО ЛОКАЦИЯМ
-        function renderLevels() {
-            const div = document.getElementById('levels-list');
-            div.innerHTML = '';
-            
-            if (activeBattle) {
-                div.innerHTML = "<p style='color:#aaa; text-align:center;'>Идет сражение...</p>";
-                return;
-            }
-
-            locations.forEach(loc => {
-                // Создаем заголовок локации
-                const locHeader = document.createElement('div');
-                locHeader.className = 'location-header';
-                locHeader.innerText = loc.name;
-                div.appendChild(locHeader);
-
-                // Генерируем уровни, принадлежащие этой локации
-                for (let i = loc.minLvl; i <= loc.maxLvl; i++) {
-                    const block = document.createElement('div');
-                    const isUnlocked = (i <= gameState.currentLevel);
-                    
-                    block.className = `level-block ${isUnlocked ? 'unlocked' : 'locked'}`;
-                    
-                    // С каждым уровнем HP врага растет на 20, урон на 4, золото на 15
-                    let npcHp = 70 + (i * 20);
-                    let npcDmg = 10 + (i * 4);
-                    let reward = 40 + (i * 15);
-
-                    block.innerHTML = `
-                        <div>
-                            <b>Уровень ${i}</b> ${i % 10 === 0 ? '⭐ [БОСС]' : ''}<br>
-                            <span style="font-size:13px; color:#aaa;">Враг: ${loc.bossAvatar} ${loc.bossName} (❤️${npcHp})</span><br>
-                            <span style="font-size:12px; color:#f1c40f;">Награда: +${reward} 🪙</span>
-                        </div>
-                        <button style="width:auto; padding:8px 12px; font-size:13px; background:${isUnlocked ? '#10ac84' : '#57606f'}; box-shadow:none;" 
-                            onclick="initTacticalBattle(${i}, ${npcHp}, ${npcDmg}, ${reward}, '${loc.bossName}', '${loc.bossAvatar}')" 
-                            ${(!isUnlocked || gameState.ownedIds.length === 0) ? 'disabled' : ''}>${isUnlocked ? 'В Бой' : '🔒'}</button>
-                    `;
-                    div.appendChild(block);
-                }
+            const grid = document.getElementById('home-monsters-grid');
+            grid.innerHTML = '';
+            gameState.ownedIds.forEach(id => {
+                const m = monsterDatabase[id];
+                const isSelected = gameState.team.includes(id);
+                const div = document.createElement('div');
+                div.className = `monster-card ${isSelected ? 'selected' : ''}`;
+                div.innerHTML = `
+                    <div class="monster-avatar">${m.avatar}</div>
+                    <div class="monster-name ${m.rarity}">${m.name}</div>
+                `;
+                div.onclick = () => toggleSelectTeam(id);
+                grid.appendChild(div);
             });
         }
 
-        function initTacticalBattle(lvl, hp, dmg, reward, name, avatar) {
-            let totalPlayerHp = 0;
-            gameState.ownedIds.forEach(id => { totalPlayerHp += monsterDatabase[id].hp; });
+        function toggleSelectTeam(id) {
+            const idx = gameState.team.indexOf(id);
+            if (idx > -1) {
+                gameState.team.splice(idx, 1);
+            } else {
+                if (gameState.team.length >= 3) {
+                    alert('Максимум 3 персонажа в поле боя!');
+                    return;
+                }
+                gameState.team.push(id);
+            }
+            updateUI();
+            saveGame();
+        }
 
-            activeBattle = {
-                levelNum: lvl,
-                npc: { name: `${name} (Lvl ${lvl})`, avatar: avatar, hp: hp, maxHp: hp, dmg: dmg },
-                player: { hp: totalPlayerHp, maxHp: totalPlayerHp },
-                reward: reward
+        function renderLevelBadges() {
+            const container = document.getElementById('levels-badge-container');
+            container.innerHTML = '';
+            for (let i = 1; i <= 50; i++) {
+                const badge = document.createElement('div');
+                const isUnlocked = i <= gameState.currentLevel;
+                badge.className = `level-badge ${isUnlocked ? 'unlocked' : 'locked'}`;
+                badge.innerText = i;
+                if (isUnlocked) badge.onclick = () => startBattleCore('level', i);
+                container.appendChild(badge);
+            }
+        }
+
+        // БИТВА С ДРУГОМ ПО ID-КОДУ
+        function startFriendBattle() {
+            const inputVal = document.getElementById('friend-id-input').value.trim();
+            if (!inputVal.startsWith('ID-') || inputVal.length < 5) {
+                alert('Неверный формат кода! Введи, например: ID-1234');
+                return;
+            }
+            if (gameState.team.length === 0) {
+                alert('Сначала выбери до 3 персонажей в свой отряд!');
+                return;
+            }
+            
+            // Переключаемся на вкладку битвы и запускаем дуэль
+            switchTab('levels');
+            startBattleCore('friend', inputVal);
+        }
+
+        // ОБЩЕЕ ЯДРО ДЛЯ ЗАПУСКА И ЛЕВЕЛОВ, И ДРУЗЕЙ
+        function startBattleCore(mode, targetData) {
+            document.getElementById('levels-selection-card').classList.add('hidden');
+            document.getElementById('battle-field-card').classList.remove('hidden');
+
+            let playerUnits = gameState.team.map((id, index) => ({
+                id: id, uid: 'p_' + index, name: monsterDatabase[id].name,
+                avatar: monsterDatabase[id].avatar, hp: monsterDatabase[id].hp,
+                maxHp: monsterDatabase[id].hp, skills: monsterDatabase[id].skills
+            }));
+
+            let enemyUnits = [];
+
+            if (mode === 'level') {
+                document.getElementById('location-title').innerText = `Кампания: Уровень ${targetData}`;
+                let enemyHp = 60 + (targetData * 25);
+                let enemyDmg = 12 + (targetData * 4);
+                let locIdx = Math.min(4, Math.floor((targetData - 1) / 10));
+                enemyUnits = [{
+                    uid: 'e_0', name: 'Босс Уровня',
+                    avatar: ['👹', '🧛', '🐺', '🐉', '💀'][locIdx],
+                    hp: enemyHp, maxHp: enemyHp, dmg: enemyDmg, isFriendBot: false
+                }];
+            } else if (mode === 'friend') {
+                document.getElementById('location-title').innerText = `Дуэль против ${targetData}`;
+                // Имитируем команду друга на основе его ID
+                // Чтобы у разных ID были разные случайные монстры
+                let seed = parseInt(targetData.replace('ID-', '')) || 5555;
+                let keys = Object.keys(monsterDatabase);
+                
+                for(let i=0; i<3; i++) {
+                    let mId = keys[(seed + i) % keys.length];
+                    let m = monsterDatabase[mId];
+                    enemyUnits.push({
+                        uid: 'e_' + i, name: 'Герой Друга', avatar: m.avatar,
+                        hp: m.hp, maxHp: m.hp, dmg: Math.floor(m.skills[0].d * 0.9), isFriendBot: true
+                    });
+                }
+            }
+
+            battleState = {
+                mode: mode, lvl: targetData, player: playerUnits, enemy: enemyUnits,
+                selectedPlayerUid: null, phase: 'enemy_turn'
             };
 
-            document.getElementById('p-hp-text').innerText = `${totalPlayerHp}/${totalPlayerHp}`;
-            document.getElementById('p-hp-bar').style.width = "100%";
-
-            document.getElementById('e-name').innerText = activeBattle.npc.name;
-            document.getElementById('e-avatar').innerText = activeBattle.npc.avatar;
-            document.getElementById('e-hp-text').innerText = `${hp}/${hp}`;
-            document.getElementById('e-hp-bar').style.width = "100%";
-
-            document.getElementById('level-battle-log').innerHTML = `⚔️ Начат пошаговый бой на <b>Уровне ${lvl}</b>!<br>Жми на карточки монстров снизу, чтобы атаковать.<br><br>`;
-            document.getElementById('level-battle-zone').classList.remove('hidden');
-            
-            renderActionButtons();
-            renderLevels();
+            renderField();
+            setTimeout(executeEnemyTurn, 1000);
         }
 
-        function renderActionButtons() {
-            const btnContainer = document.getElementById('battle-actions-container');
-            btnContainer.innerHTML = '';
-            gameState.ownedIds.forEach(id => {
-                const monster = monsterDatabase[id];
-                const btn = document.createElement('button');
-                btn.className = 'action-btn';
-                btn.innerHTML = `${monster.avatar} ${monster.name}<br>(${monster.dmg} DMG)`;
-                btn.onclick = () => handlePlayerTurn(id);
-                btnContainer.appendChild(btn);
+        function renderField() {
+            const pSide = document.getElementById('player-side'); pSide.innerHTML = '';
+            battleState.player.forEach(u => {
+                const div = document.createElement('div'); div.id = u.uid;
+                div.className = `field-unit ${u.hp <= 0 ? 'dead' : ''} ${battleState.selectedPlayerUid === u.uid ? 'active-choice' : ''}`;
+                div.innerHTML = `<div class="field-avatar">${u.avatar}</div><div class="field-hp-bar-bg"><div class="field-hp-bar" style="width: ${(u.hp / u.maxHp) * 100}%"></div></div>`;
+                if (battleState.phase === 'player_turn' && u.hp > 0) div.onclick = () => selectHeroForAttack(u.uid);
+                pSide.appendChild(div);
+            });
+
+            const eSide = document.getElementById('enemy-side'); eSide.innerHTML = '';
+            battleState.enemy.forEach(u => {
+                const div = document.createElement('div'); div.id = u.uid;
+                div.className = `field-unit enemy ${u.hp <= 0 ? 'dead' : ''}`;
+                div.innerHTML = `<div class="field-avatar">${u.avatar}</div><div class="field-hp-bar-bg"><div class="field-hp-bar" style="width: ${(u.hp / u.maxHp) * 100}%"></div></div>`;
+                eSide.appendChild(div);
             });
         }
 
-        function handlePlayerTurn(monsterId) {
-            if (!activeBattle) return;
-            const monster = monsterDatabase[monsterId];
-            const log = document.getElementById('level-battle-log');
+        function executeEnemyTurn() {
+            if (!battleState) return;
+            document.getElementById('turn-indicator').innerText = 'Ход Противника...';
+            document.getElementById('turn-indicator').style.color = '#ff4757';
+            document.getElementById('skills-control').classList.add('hidden');
 
-            // Ход игрока
-            activeBattle.npc.hp -= monster.dmg;
-            if (activeBattle.npc.hp < 0) activeBattle.npc.hp = 0;
+            let alivePlayers = battleState.player.filter(u => u.hp > 0);
+            let aliveEnemies = battleState.enemy.filter(u => u.hp > 0);
 
-            document.getElementById('e-hp-bar').style.width = ((activeBattle.npc.hp / activeBattle.npc.maxHp) * 100) + "%";
-            document.getElementById('e-hp-text').innerText = `${activeBattle.npc.hp}/${activeBattle.npc.maxHp}`;
-            log.innerHTML += `💥 <b>${monster.name}</b> нанес <b>${monster.dmg}</b> урона!<br>`;
-
-            if (activeBattle.npc.hp <= 0) {
-                log.innerHTML += `<br>🏆 <b>УРОВЕНЬ ПРОЙДЕН!</b><br>💰 Получено: <b>+${activeBattle.reward} монет</b>!<br>`;
-                gameState.coins += activeBattle.reward;
+            if (alivePlayers.length > 0 && aliveEnemies.length > 0) {
+                // Случайный живой враг бьет случайного живого игрока
+                let attacker = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+                let target = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
                 
-                // Открываем следующий уровень, если прошли текущий максимальный
-                if (activeBattle.levelNum === gameState.currentLevel && gameState.currentLevel < 50) {
-                    gameState.currentLevel++;
-                    log.innerHTML += `🔓 Открыт доступ к <b>Уровню ${gameState.currentLevel}</b>!<br>`;
+                target.hp -= attacker.dmg;
+                if (target.hp < 0) target.hp = 0;
+
+                createDamagePop(target.uid, attacker.dmg);
+                renderField();
+
+                if (battleState.player.filter(u => u.hp > 0).length === 0) {
+                    alert('💀 Твой отряд полностью разбит!');
+                    closeBattleField();
+                    return;
                 }
-                endBattle();
-                return;
             }
 
-            // Ход компьютера
-            activeBattle.player.hp -= activeBattle.npc.dmg;
-            if (activeBattle.player.hp < 0) activeBattle.player.hp = 0;
-
-            document.getElementById('p-hp-bar').style.width = ((activeBattle.player.hp / activeBattle.player.maxHp) * 100) + "%";
-            document.getElementById('p-hp-text').innerText = `${activeBattle.player.hp}/${activeBattle.player.maxHp}`;
-            log.innerHTML += `🥊 Враг бьет в ответ и наносит всей твоей банде <b>${activeBattle.npc.dmg}</b> урона.<br><br>`;
-
-            if (activeBattle.player.hp <= 0) {
-                log.innerHTML += `<br>💀 <b>ПОРАЖЕНИЕ!</b> Твоя команда пала. Открой капсулы в магазине, чтобы увеличить общее здоровье команды.<br>`;
-                endBattle();
-                return;
-            }
-            log.scrollTop = log.scrollHeight;
+            battleState.phase = 'player_turn';
+            document.getElementById('turn-indicator').innerText = 'ТВОЙ ХОД! Жми на своего бойца';
+            document.getElementById('turn-indicator').style.color = '#2ecc71';
+            renderField();
         }
 
-        function endBattle() {
-            activeBattle = null;
+        function selectHeroForAttack(uid) {
+            battleState.selectedPlayerUid = uid;
+            renderField();
+            const unit = battleState.player.find(u => u.uid === uid);
+            document.getElementById('selected-hero-name').innerText = `Способности ${unit.avatar}:`;
+            
+            const skillsContainer = document.getElementById('skills-buttons');
+            skillsContainer.innerHTML = '';
+            unit.skills.forEach(skill => {
+                const b = document.createElement('button');
+                b.style.fontSize = '13px'; b.style.background = '#341f97'; b.style.boxShadow = '0 3px 0 #1e1250';
+                b.innerHTML = `${skill.n}<br><small>${skill.d} DMG</small>`;
+                b.onclick = () => useSkill(unit, skill);
+                skillsContainer.appendChild(b);
+            });
+            document.getElementById('skills-control').classList.remove('hidden');
+        }
+
+        function useSkill(attacker, skill) {
+            let aliveEnemies = battleState.enemy.filter(u => u.hp > 0);
+            if (aliveEnemies.length === 0) return;
+
+            // Бьем первого живого врага в ряду
+            let target = aliveEnemies[0];
+            target.hp -= skill.d;
+            if (target.hp < 0) target.hp = 0;
+
+            createDamagePop(target.uid, skill.d);
+            battleState.selectedPlayerUid = null;
+            document.getElementById('skills-control').classList.add('hidden');
+            renderField();
+
+            if (battleState.enemy.filter(u => u.hp > 0).length === 0) {
+                let prize = battleState.mode === 'level' ? (50 + (battleState.lvl * 20)) : 200; // Фиксированный куш за друга
+                gameState.coins += prize;
+                
+                if (battleState.mode === 'level' && battleState.lvl === gameState.currentLevel && gameState.currentLevel < 50) {
+                    gameState.currentLevel++;
+                }
+                alert(`🏆 ПОБЕДА НА АРЕНЕ!\nНаграда: +${prize} 🪙`);
+                closeBattleField();
+                return;
+            }
+
+            battleState.phase = 'enemy_turn';
+            setTimeout(executeEnemyTurn, 1200);
+        }
+
+        function createDamagePop(unitUid, value) {
+            const el = document.getElementById(unitUid);
+            if (!el) return;
+            const pop = document.createElement('div');
+            pop.className = 'damage-pop'; pop.innerText = `-${value}`;
+            el.appendChild(pop);
+            setTimeout(() => pop.remove(), 800);
+        }
+
+        function closeBattleField() {
+            battleState = null;
             saveGame();
             updateUI();
-            setTimeout(() => {
-                document.getElementById('level-battle-zone').classList.add('hidden');
-                renderLevels();
-            }, 4000);
+            document.getElementById('battle-field-card').classList.add('hidden');
+            document.getElementById('levels-selection-card').classList.remove('hidden');
+            renderLevelBadges();
         }
 
         window.onload = loadGame;
