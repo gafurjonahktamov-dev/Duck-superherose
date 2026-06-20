@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Супер-Утки: Лига Супергероев</title>
+    <title>Супер-Утки: Гастрономическая Битва</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -24,7 +24,7 @@
             text-align: center;
             padding: 12px 0;
             box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             border-bottom: 2px solid #ffbc00;
         }
@@ -53,14 +53,15 @@
             border: none;
             border-radius: 10px;
             padding: 12px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 0 #b38400;
         }
         button:active { transform: translateY(4px); box-shadow: none; }
+        button:disabled { background-color: #555 !important; box-shadow: none !important; color: #aaa !important; cursor: not-allowed; }
 
-        input {
+        input, select {
             width: 100%;
             padding: 12px;
             background: #252f3d;
@@ -73,8 +74,6 @@
             text-align: center;
         }
 
-        .rare { color: #54a0ff; } .super-rare { color: #a55eea; } .epic { color: #ff4757; } .legendary { color: #ffbc00; }
-
         .monster-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -86,144 +85,101 @@
             background: #252f3d;
             border: 3px solid #3d4d63;
             border-radius: 12px;
-            padding: 8px;
+            padding: 10px 5px;
             text-align: center;
             cursor: pointer;
+            position: relative;
         }
-        .monster-card.selected { border-color: #ffbc00; background: #2c321d; }
+        .monster-card.in-team { border-color: #ffbc00; background: #2c3524; }
         .monster-avatar { font-size: 38px; margin-bottom: 5px; }
-        .monster-name { font-size: 11px; font-weight: bold; }
+        .monster-name { font-size: 12px; font-weight: bold; }
+        .monster-lvl { font-size: 10px; color: #ffbc00; margin-top: 2px; }
+        
+        .xp-bar-bg { background: #444; width: 100%; height: 4px; border-radius: 2px; margin-top: 5px; overflow: hidden; }
+        .xp-bar { background: #00d2d3; height: 100%; width: 0%; transition: width 0.3s; }
 
-        .capsule-item {
-            background: #252f3d;
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .team-status {
+            position: absolute; top: -5px; right: -5px;
+            background: #ffbc00; color: #000; font-size: 8px;
+            font-weight: bold; padding: 2px 4px; border-radius: 5px;
+        }
+
+        .food-market-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .food-item-card {
+            background: #252f3d; border: 1px solid #3d4d63;
+            border-radius: 12px; padding: 10px; text-align: center;
         }
 
         .level-badge-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 8px;
-            max-height: 250px;
+            max-height: 180px;
             overflow-y: auto;
         }
         .level-badge {
-            background: #252f3d;
-            padding: 10px 0;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
+            background: #252f3d; padding: 10px 0; border-radius: 8px;
+            text-align: center; font-weight: bold; cursor: pointer;
         }
         .level-badge.unlocked { background: #00d2d3; color: black; }
         .level-badge.locked { opacity: 0.3; cursor: not-allowed; }
 
-        /* СУПЕРГЕРОЙСКОЕ ПОЛЕ БОЯ */
+        /* ПОЛЕ БОЯ */
         .battle-field {
             background: linear-gradient(180deg, #10141d 0%, #2c3e50 100%);
-            border-radius: 16px;
-            height: 240px;
-            position: relative;
-            overflow: hidden;
-            border: 3px solid #ffbc00;
-            display: flex;
-            justify-content: space-between;
-            padding: 20px;
-            box-sizing: border-box;
-            align-items: center;
+            border-radius: 16px; height: 240px; position: relative;
+            overflow: hidden; border: 3px solid #ffbc00; display: flex;
+            justify-content: space-between; padding: 15px; box-sizing: border-box; align-items: center;
         }
-
-        .field-side {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            justify-content: center;
-            width: 35%;
-        }
-
-        .field-unit {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .field-unit.active-choice { transform: scale(1.2); filter: drop-shadow(0 0 10px #ffbc00); }
-        .field-unit.dead { opacity: 0.2; filter: grayscale(1); pointer-events: none; }
-        
-        .field-avatar { font-size: 44px; }
-        
-        .field-hp-bar-bg {
-            background: #444;
-            width: 55px;
-            height: 6px;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 4px;
-        }
-        .field-hp-bar { background: #10ac84; height: 100%; width: 100%; transition: width 0.2s; }
+        .field-side { display: flex; flex-direction: column; gap: 12px; justify-content: center; width: 38%; }
+        .field-unit { display: flex; flex-direction: column; align-items: center; position: relative; cursor: pointer; }
+        .field-unit.active-choice { transform: scale(1.15); filter: drop-shadow(0 0 10px #ffbc00); }
+        .field-unit.dead { opacity: 0.15; filter: grayscale(1); pointer-events: none; }
+        .field-avatar { font-size: 40px; }
+        .field-name { font-size: 10px; color: #ccc; margin-top: 2px; text-align: center; }
+        .field-hp-bar-bg { background: #444; width: 60px; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+        .field-hp-bar { background: #10ac84; height: 100%; width: 100%; }
         .field-unit.enemy .field-hp-bar { background: #ff4757; }
 
-        .damage-pop {
-            position: absolute;
-            color: #ff4757;
-            font-weight: bold;
-            font-size: 22px;
-            animation: popUp 0.8s ease-out forwards;
-            pointer-events: none;
-            z-index: 10;
-            text-shadow: 0 2px 4px #000;
-        }
-        @keyframes popUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-35px) scale(1.4); }
-        }
+        .damage-pop { position: absolute; color: #ff4757; font-weight: bold; font-size: 22px; animation: popUp 0.8s forwards; }
+        @keyframes popUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-30px); } }
 
-        .skills-panel {
-            background: #0d1117;
-            padding: 12px;
-            border-radius: 12px;
-            margin-top: 10px;
-            text-align: center;
-            border: 1px solid #ffbc00;
-        }
-        .skills-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 5px;
-        }
+        /* МОДАЛКА */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 200; }
+        .modal-content { background: #1b222c; padding: 20px; border-radius: 16px; width: 85%; max-width: 400px; border: 2px solid #ffbc00; text-align: center; }
+
+        .skills-panel { background: #0d1117; padding: 12px; border-radius: 12px; margin-top: 10px; border: 1px solid #ffbc00; }
+        .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
 
         .bottom-nav {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
             width: 100%; max-width: 500px; background-color: #1b222c;
-            display: flex; justify-content: space-around; padding: 12px 0;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.5); border-top: 2px solid #2c3848; z-index: 100;
+            display: flex; justify-content: space-around; padding: 12px 0; border-top: 2px solid #2c3848; z-index: 100;
         }
-        .nav-btn { background-color: #252f3d; color: white; box-shadow: 0 3px 0 #151c24; padding: 10px; font-size: 14px; width: 22%; }
+        .nav-btn { background-color: #252f3d; color: white; padding: 10px; font-size: 13px; width: 22%; border-radius: 8px; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <header>
-        Супер-Монеты: <span id="coins-display">100</span> 🪙
+        Монеты: <span id="coins-display">150</span> 🪙 | 
+        Хлеб: <span id="f-bread">0</span> 🍞 | 
+        Тост: <span id="f-toast">0</span> 🥪 | 
+        Перец: <span id="f-pepper">0</span> 🌶️
     </header>
 
     <div class="container">
         
         <div id="tab-home" class="tab-content">
             <div class="card" style="text-align: center;">
-                <h2>🦆 Штаб Супер-Уток</h2>
-                <p style="font-size: 13px; color: #aaa;">Твой Код Отряда для дуэли с друзьями:</p>
-                <h3 id="my-id-display" style="color: #ffbc00; letter-spacing: 2px; margin: 5px 0;">ID-0000</h3>
-                <p style="font-size: 12px; color: #9aa0a6;">Выбери 3 уток-супергероев на Арену:</p>
+                <h2>🦆 Оперативный Штаб</h2>
+                <p style="font-size: 12px; color: #aaa;">Твой ID: <b id="my-id-display" style="color: #ffbc00;">ID-0000</b></p>
                 <div id="home-monsters-grid" class="monster-grid"></div>
             </div>
         </div>
@@ -231,7 +187,13 @@
         <div id="tab-shop" class="tab-content hidden">
             <div class="card">
                 <h2>🛒 Секретные Капсулы</h2>
+                <p style="font-size:11px; color:#aaa; margin-top:-10px;">(Первые 3 открытия приносят только 100% уток!)</p>
                 <div id="capsules-market"></div>
+            </div>
+            
+            <div class="card">
+                <h2>🍏 Продуктовая Лавка</h2>
+                <div id="food-market" class="food-market-grid"></div>
             </div>
         </div>
 
@@ -243,86 +205,125 @@
 
             <div id="battle-field-card" class="card hidden">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span id="turn-indicator" style="font-weight:bold; color:#ffbc00;">Ход супер-злодеев...</span>
-                    <span id="location-title" style="font-size:12px; color:#aaa;">Сектор Боя</span>
+                    <span id="turn-indicator" style="font-weight:bold; color:#ffbc00;">Загрузка...</span>
+                    <span id="location-title" style="font-size:12px; color:#aaa;">Сектор</span>
                 </div>
                 <div id="battle-arena" class="battle-field">
                     <div id="player-side" class="field-side"></div>
                     <div id="enemy-side" class="field-side"></div>
                 </div>
                 <div id="skills-control" class="skills-panel hidden">
-                    <span id="selected-hero-name" style="font-size:13px; font-weight:bold; color:#ffbc00;">Супер-Атака:</span>
+                    <span id="selected-hero-name" style="font-size:13px; font-weight:bold; color:#ffbc00;">Удар:</span>
                     <div id="skills-buttons" class="skills-grid"></div>
                 </div>
             </div>
         </div>
 
         <div id="tab-friends" class="tab-content hidden">
-            <div id="friends-main-card" class="card" style="text-align: center;">
-                <h2>⚔️ Битва по Коду</h2>
-                <p style="font-size: 13px; color: #aaa;">Введи ID-код друга, чтобы проверить, чьи утки круче!</p>
-                <input type="text" id="friend-id-input" placeholder="ID-1234">
-                <button style="width: 100%;" onclick="startFriendBattle()">Вызвать на Дуэль!</button>
+            <div class="card" style="text-align: center;">
+                <h2>⚔️ Вызов на Дуэль</h2>
+                <input type="text" id="friend-id-input" placeholder="ID друга (Пример: ID-1234)">
+                <button style="width: 100%; margin-bottom: 15px;" onclick="startFriendBattle()">Начать бой</button>
+                
+                <hr style="border-color:#3d4d63; margin: 15px 0;">
+                
+                <h2>🔄 Рыночный Обмен Утками</h2>
+                <select id="trade-duck-select"></select>
+                <button style="width: 100%; background:#00d2d3; color:#000;" onclick="executeTrade()">Отправить утку на обмен</button>
             </div>
         </div>
 
     </div>
 
+    <div id="duck-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="modal-duck-name">Утка</h2>
+            <div id="modal-duck-avatar" style="font-size:55px; margin: 5px 0;">🦆</div>
+            <p id="modal-duck-stats" style="font-size:13px; color:#ccc; margin-bottom:5px;"></p>
+            
+            <div style="background:#0d1117; padding:8px; border-radius:10px; margin-bottom:12px; text-align:left;">
+                <span style="font-size:12px; font-weight:bold; color:#ffbc00;">Покормить утку (Выбери еду):</span>
+                <select id="food-feed-select" style="margin:5px 0 0 0; padding:6px; font-size:13px;"></select>
+                <button id="feed-btn" style="width:100%; padding:6px; font-size:13px; margin-top:5px; background:#2ecc71;" onclick="feedDuckAction()">Дать еду</button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button id="modal-btn-team" onclick="modalToggleTeam()">Взять в отряд</button>
+                <button id="modal-btn-sell" style="background:#ff4757; color:white;">Продать утку</button>
+                <button style="background:#555; color:white;" onclick="closeModal()">Назад</button>
+            </div>
+        </div>
+    </div>
+
     <div class="bottom-nav">
-        <button class="nav-btn" style="background-color: #ffbc00; color: black; box-shadow: 0 3px 0 #b38400;" onclick="switchTab('home')">Штаб</button>
-        <button class="nav-btn" onclick="switchTab('shop')">Капсулы</button>
+        <button class="nav-btn" style="background-color: #ffbc00; color: black;" onclick="switchTab('home')">Штаб</button>
+        <button class="nav-btn" onclick="switchTab('shop')">Магазин</button>
         <button class="nav-btn" onclick="switchTab('levels')">Арена</button>
         <button class="nav-btn" onclick="switchTab('friends')">Друзья</button>
     </div>
 
     <script>
+        // База данных супергероев
         const monsterDatabase = {
-            spiderDuck:  { name: 'Утка-Паук',    rarity: 'rare', hp: 90, avatar: '🕸️', skills: [{n: 'Паутина', d: 16}, {n: 'Удар крылом', d: 24}] },
-            capDuck:     { name: 'Утка-Капитан',  rarity: 'rare', hp: 95, avatar: '🛡️', skills: [{n: 'Бросок щита', d: 18}, {n: 'Кряк Свободы', d: 22}] },
-            ironDuck:    { name: 'Железный Селезень', rarity: 'super-rare', hp: 120, avatar: '🤖', skills: [{n: 'Лазер из клюва', d: 28}, {n: 'Ракетный залп', d: 38}] },
-            thorDuck:    { name: 'Утка-Тор',     rarity: 'super-rare', hp: 130, avatar: '⚡', skills: [{n: 'Молот Грозы', d: 30}, {n: 'Призыв молнии', d: 42}] },
-            hulkDuck:    { name: 'Халк-Утка',    rarity: 'epic', hp: 220, avatar: '🟢', skills: [{n: 'Халк КРЯК!', d: 20}, {n: 'Сломать пруд', d: 35}] },
-            batDuck:     { name: 'Бэт-Утка',     rarity: 'epic', hp: 160, avatar: '🦇', skills: [{n: 'Бэтранг', d: 36}, {n: 'Плащ Ночи', d: 48}] },
-            cyborgDuck:  { name: 'Киборг-Утка',  rarity: 'legendary', hp: 260, avatar: '🦾', skills: [{n: 'Кибер-таран', d: 45}, {n: 'Фотонный кряк', d: 65}] }
+            spiderDuck:  { name: 'Утка-Паук',    sellPrice: 20,  hp: 90, avatar: '🕸️', skills: [{n: 'Паутина', d: 16, cd: 0}, {n: 'Сеть-Ловушка', d: 28, cd: 2}] },
+            capDuck:     { name: 'Утка-Капитан',  sellPrice: 25,  hp: 95, avatar: '🛡️', skills: [{n: 'Удар щитом', d: 15, cd: 0}, {n: 'Бросок щита', d: 32, cd: 2}] },
+            ironDuck:    { name: 'Железный Селезень', sellPrice: 50, hp: 120, avatar: '🤖', skills: [{n: 'Лазер', d: 22, cd: 0}, {n: 'Залп Ракет', d: 45, cd: 3}] },
+            thorDuck:    { name: 'Утка-Тор',     sellPrice: 60,  hp: 130, avatar: '⚡', skills: [{n: 'Удар молотом', d: 25, cd: 0}, {n: 'Гроза', d: 50, cd: 3}] },
+            hulkDuck:    { name: 'Халк-Утка',    sellPrice: 100, hp: 220, avatar: '🟢', skills: [{n: 'Шлепок', d: 18, cd: 0}, {n: 'КРЯК-УДАР', d: 40, cd: 2}] },
+            batDuck:     { name: 'Бэт-Утка',     sellPrice: 120, hp: 160, avatar: '🦇', skills: [{n: 'Бэтранг', d: 26, cd: 0}, {n: 'Плащ Ночи', d: 55, cd: 3}] },
+            cyborgDuck:  { name: 'Киборг-Утка',  sellPrice: 250, hp: 260, avatar: '🦾', skills: [{n: 'Импульс', d: 35, cd: 0}, {n: 'Фотонный Луч', d: 75, cd: 4}] }
+        };
+
+        // База данных еды
+        const foodDatabase = {
+            bread:     { n: 'Хлеб',     emoji: '🍞', xp: 10,  price: 15 },
+            toast:     { n: 'Тост',     emoji: '🥪', xp: 25,  price: 30 },
+            donut:     { n: 'Пончик',   emoji: '🍩', xp: 50,  price: 55 },
+            cheese:    { n: 'Сыр',      emoji: '🧀', xp: 100, price: 100 },
+            chocolate: { n: 'Шоколадка',emoji: '🍫', xp: 200, price: 190 },
+            pepper:    { n: 'Огненный Перец', emoji: '🌶️', xp: 500, price: 450 } // Дополнительный супер-корм
         };
 
         const capsulesConfig = [
-            { id: 'rare', name: 'Редкая Утка', price: 30, textClass: 'rare', contains: ['spiderDuck', 'capDuck'] },
-            { id: 'super-rare', name: 'Сверхредкая Утка', price: 70, textClass: 'super-rare', contains: ['ironDuck', 'thorDuck'] },
-            { id: 'epic', name: 'Эпическая Утка', price: 150, textClass: 'epic', contains: ['hulkDuck', 'batDuck'] },
-            { id: 'legendary', name: 'ЛЕГЕНДАРНАЯ УТКА', price: 350, textClass: 'legendary', contains: ['cyborgDuck'] }
+            { id: 'standard', name: 'Обычное яйцо', price: 40, contains: ['spiderDuck', 'capDuck', 'ironDuck'] },
+            { id: 'super', name: 'Эпический контейнер', price: 110, contains: ['ironDuck', 'thorDuck', 'hulkDuck', 'batDuck'] }
         ];
 
-        const locations = ['🌾 Чистый Пруд', '🏭 Сточные Воды', '🌆 Крыши Готэма', '🌌 Космическая Станция', '🌋 База Суперзлодеев'];
-
         let gameState = {
-            coins: 100,
-            ownedIds: ['spiderDuck', 'capDuck'], 
-            team: [],
+            coins: 150,
+            inventory: [
+                { uid: 'u_1', id: 'spiderDuck', lvl: 1, xp: 0 },
+                { uid: 'u_2', id: 'capDuck', lvl: 1, xp: 0 }
+            ],
+            teamUids: [],
+            food: { bread: 2, toast: 1, donut: 0, cheese: 0, chocolate: 0, pepper: 0 },
+            boxesOpened: 0, // Счётчик открытых ящиков для защиты от еды первые 3 раза
             currentLevel: 1,
             myId: ''
         };
 
         let battleState = null;
+        let selectedInventoryUid = null;
 
         function loadGame() {
-            const saved = localStorage.getItem('super_ducks_heroes_v1');
+            const saved = localStorage.getItem('super_ducks_food_v1');
             if (saved) gameState = JSON.parse(saved);
             if (!gameState.myId) gameState.myId = 'ID-' + Math.floor(1000 + Math.random() * 9000);
             document.getElementById('my-id-display').innerText = gameState.myId;
             updateUI();
             renderCapsules();
+            renderFoodMarket();
         }
 
         function saveGame() {
-            localStorage.setItem('super_ducks_heroes_v1', JSON.stringify(gameState));
+            localStorage.setItem('super_ducks_food_v1', JSON.stringify(gameState));
         }
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             if (tabName === 'home') document.getElementById('tab-home').classList.remove('hidden');
             if (tabName === 'shop') document.getElementById('tab-shop').classList.remove('hidden');
-            if (tabName === 'friends') document.getElementById('tab-friends').classList.remove('hidden');
+            if (tabName === 'friends') { document.getElementById('tab-friends').classList.remove('hidden'); setupTradeSelect(); }
             if (tabName === 'levels') {
                 document.getElementById('tab-levels').classList.remove('hidden');
                 document.getElementById('levels-selection-card').classList.remove('hidden');
@@ -332,69 +333,176 @@
         }
 
         function renderCapsules() {
-            const container = document.getElementById('capsules-market');
-            container.innerHTML = '';
+            const container = document.getElementById('capsules-market'); container.innerHTML = '';
             capsulesConfig.forEach(c => {
                 const div = document.createElement('div');
-                div.className = 'capsule-item';
-                div.innerHTML = `
-                    <div><span class="${c.textClass}" style="font-weight:bold;">${c.name}</span><br><small>Цена: ${c.price} 🪙</small></div>
-                    <button style="padding:6px 12px; font-size:13px; background:#ffbc00; color:black; box-shadow:0 3px 0 #b38400;" onclick="buyCapsule('${c.id}')">Открыть</button>
-                `;
+                div.style = 'background:#252f3d; padding:10px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;';
+                div.innerHTML = `<div><b>${c.name}</b><br><small>Цена: ${c.price} 🪙</small></div>
+                                 <button style="padding:6px 12px;" onclick="buyCapsule('${c.id}')">Открыть</button>`;
                 container.appendChild(div);
             });
         }
 
+        function renderFoodMarket() {
+            const container = document.getElementById('food-market'); container.innerHTML = '';
+            Object.keys(foodDatabase).forEach(fKey => {
+                const f = foodDatabase[fKey];
+                const div = document.createElement('div');
+                div.className = 'food-item-card';
+                div.innerHTML = `<div style="font-size:24px;">${f.emoji}</div>
+                                 <div style="font-size:12px; font-weight:bold;">${f.n} (+${f.xp} XP)</div>
+                                 <button style="padding:4px 8px; font-size:11px; margin-top:6px; width:100%;" onclick="buyFood('${fKey}')">${f.price} 🪙</button>`;
+                container.appendChild(div);
+            });
+        }
+
+        function buyFood(fKey) {
+            const f = foodDatabase[fKey];
+            if (gameState.coins >= f.price) {
+                gameState.coins -= f.price;
+                gameState.food[fKey]++;
+                updateUI(); saveGame();
+            } else { alert('Недостаточно монет!'); }
+        }
+
+        /* ОТКРЫТИЕ ЯЩИКОВ С ЗАЩИТОЙ ПЕРВЫХ 3-Х РАЗ */
         function buyCapsule(id) {
             const conf = capsulesConfig.find(c => c.id === id);
-            if (gameState.coins >= conf.price) {
-                gameState.coins -= conf.price;
-                const rId = conf.contains[Math.floor(Math.random() * conf.contains.length)];
-                if (!gameState.ownedIds.includes(rId)) gameState.ownedIds.push(rId);
-                alert(`💥 Новая утка в отряде: ${monsterDatabase[rId].name}!`);
-                updateUI();
-                saveGame();
+            if (gameState.coins < conf.price) { alert('Не хватает монет!'); return; }
+
+            gameState.coins -= conf.price;
+            gameState.boxesOpened++;
+
+            // Если открыто <= 3 ящиков, шанс выпадения еды равен 0% (строго утка)
+            let forceHero = gameState.boxesOpened <= 3;
+            let rolledFood = !forceHero && Math.random() < 0.45; // 45% шанс на еду после 3-го раза
+
+            if (rolledFood) {
+                let foodKeys = Object.keys(foodDatabase);
+                let randomFoodKey = foodKeys[Math.floor(Math.random() * foodKeys.length)];
+                gameState.food[randomFoodKey] += 2; // Выпадает сразу 2 единицы еды
+                alert(`📦 Капсула открыта! Внутри оказалась еда для питомцев: ${foodDatabase[randomFoodKey].emoji} ${foodDatabase[randomFoodKey].n} x2!`);
             } else {
-                alert('Не хватает супер-монет!');
+                let rId = conf.contains[Math.floor(Math.random() * conf.contains.length)];
+                let newUid = 'u_' + Date.now() + Math.floor(Math.random()*50);
+                gameState.inventory.push({ uid: newUid, id: rId, lvl: 1, xp: 0 });
+                alert(`💥 Из капсулы вылупился супергерой: ${monsterDatabase[rId].name}!`);
             }
+            updateUI(); saveGame();
         }
 
         function updateUI() {
             document.getElementById('coins-display').innerText = gameState.coins;
-            const grid = document.getElementById('home-monsters-grid');
-            grid.innerHTML = '';
-            gameState.ownedIds.forEach(id => {
-                const m = monsterDatabase[id];
-                const isSelected = gameState.team.includes(id);
+            
+            // Быстрый апдейт панели ресурсов сверху
+            document.getElementById('f-bread').innerText = gameState.food.bread;
+            document.getElementById('f-toast').innerText = gameState.food.toast;
+            document.getElementById('f-pepper').innerText = gameState.food.pepper;
+
+            const grid = document.getElementById('home-monsters-grid'); grid.innerHTML = '';
+            gameState.inventory.forEach(item => {
+                const base = monsterDatabase[item.id];
+                const isInTeam = gameState.teamUids.includes(item.uid);
+                
+                let targetXp = item.lvl * 50;
+                let xpPerc = Math.min(100, (item.xp / targetXp) * 100);
+
                 const div = document.createElement('div');
-                div.className = `monster-card ${isSelected ? 'selected' : ''}`;
+                div.className = `monster-card ${isInTeam ? 'in-team' : ''}`;
                 div.innerHTML = `
-                    <div class="monster-avatar">${m.avatar}</div>
-                    <div class="monster-name ${m.rarity}">${m.name}</div>
+                    ${isInTeam ? '<div class="team-status">ОТРЯД</div>' : ''}
+                    <div class="monster-avatar">${base.avatar}</div>
+                    <div class="monster-name">${base.name}</div>
+                    <div class="monster-lvl">Ур. ${item.lvl}</div>
+                    <div class="xp-bar-bg"><div class="xp-bar" style="width: ${xpPerc}%"></div></div>
                 `;
-                div.onclick = () => toggleSelectTeam(id);
+                div.onclick = () => openDuckModal(item.uid);
                 grid.appendChild(div);
             });
         }
 
-        function toggleSelectTeam(id) {
-            const idx = gameState.team.indexOf(id);
-            if (idx > -1) {
-                gameState.team.splice(idx, 1);
-            } else {
-                if (gameState.team.length >= 3) {
-                    alert('В отряд можно взять максимум 3 утки!');
-                    return;
-                }
-                gameState.team.push(id);
+        /* ОТКРЫТИЕ ОКНА УТКИ И КОРМЛЕНИЯ */
+        function openDuckModal(uid) {
+            selectedInventoryUid = uid;
+            const item = gameState.inventory.find(i => i.uid === uid);
+            const base = monsterDatabase[item.id];
+            const isInTeam = gameState.teamUids.includes(uid);
+
+            document.getElementById('modal-duck-name').innerText = base.name;
+            document.getElementById('modal-duck-avatar').innerText = base.avatar;
+            
+            let calculatedHp = base.hp + (item.lvl - 1) * 20;
+            let targetXp = item.lvl * 50;
+            document.getElementById('modal-duck-stats').innerText = `Уровень: ${item.lvl} | Опыт: ${item.xp}/${targetXp} | HP: ${calculatedHp}`;
+
+            const teamBtn = document.getElementById('modal-btn-team');
+            teamBtn.innerText = isInTeam ? '❌ Убрать из отряда' : '✅ Взять в отряд';
+            
+            const sellPrice = base.sellPrice + (item.lvl * 8);
+            document.getElementById('modal-btn-sell').innerText = `💰 Продать (Скрытая ценность: ${sellPrice} 🪙)`;
+            document.getElementById('modal-btn-sell').onclick = () => sellDuck(uid, sellPrice);
+
+            // Обновляем селектор выбора еды для кормления
+            const select = document.getElementById('food-feed-select'); select.innerHTML = '';
+            Object.keys(foodDatabase).forEach(fKey => {
+                const f = foodDatabase[fKey];
+                const count = gameState.food[fKey];
+                const opt = document.createElement('option');
+                opt.value = fKey;
+                opt.innerText = `${f.emoji} ${f.n} (В наличии: ${count} шт. | дает +${f.xp} XP)`;
+                select.appendChild(opt);
+            });
+
+            document.getElementById('duck-modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('duck-modal').classList.add('hidden'); }
+
+        /* МЕХАНИКА КОРМЛЕНИЯ ЕДОЙ И ПОВЫШЕНИЯ УРОВНЯ */
+        function feedDuckAction() {
+            const fKey = document.getElementById('food-feed-select').value;
+            if (gameState.food[fKey] <= 0) { alert('У тебя нет этой еды! Купи её в магазине.'); return; }
+
+            gameState.food[fKey]--;
+            const item = gameState.inventory.find(i => i.uid === selectedInventoryUid);
+            const food = foodDatabase[fKey];
+
+            item.xp += food.xp;
+            let targetXp = item.lvl * 50;
+
+            // Проверяем левелап (может повыситься сразу на несколько уровней от крутой еды)
+            while (item.xp >= targetXp) {
+                item.xp -= targetXp;
+                item.lvl++;
+                targetXp = item.lvl * 50;
             }
-            updateUI();
-            saveGame();
+
+            saveGame(); updateUI();
+            // Переоткрываем модалку для обновления цифр опыта
+            openDuckModal(selectedInventoryUid);
+        }
+
+        function modalToggleTeam() {
+            const uid = selectedInventoryUid;
+            const idx = gameState.teamUids.indexOf(uid);
+            if (idx > -1) { gameState.teamUids.splice(idx, 1); } 
+            else {
+                if (gameState.teamUids.length >= 3) { alert('Максимум 3 утки на поле боя!'); return; }
+                gameState.teamUids.push(uid);
+            }
+            closeModal(); updateUI(); saveGame();
+        }
+
+        function sellDuck(uid, price) {
+            if (gameState.inventory.length <= 1) { alert('Нельзя оставить штаб пустым!'); return; }
+            gameState.coins += price;
+            gameState.inventory = gameState.inventory.filter(i => i.uid !== uid);
+            gameState.teamUids = gameState.teamUids.filter(tUid => tUid !== uid);
+            closeModal(); updateUI(); saveGame();
         }
 
         function renderLevelBadges() {
-            const container = document.getElementById('levels-badge-container');
-            container.innerHTML = '';
+            const container = document.getElementById('levels-badge-container'); container.innerHTML = '';
             for (let i = 1; i <= 50; i++) {
                 const badge = document.createElement('div');
                 const isUnlocked = i <= gameState.currentLevel;
@@ -405,64 +513,42 @@
             }
         }
 
-        function startFriendBattle() {
-            const inputVal = document.getElementById('friend-id-input').value.trim();
-            if (!inputVal.startsWith('ID-') || inputVal.length < 5) {
-                alert('Введите правильный код друга! (Пример: ID-1234)');
-                return;
-            }
-            if (gameState.team.length === 0) {
-                alert('Выбери супер-уток в штабе!');
-                return;
-            }
-            switchTab('levels');
-            startBattleCore('friend', inputVal);
-        }
-
+        /* ПОДГОТОВКА СРАЖЕНИЯ НА АРЕНЕ */
         function startBattleCore(mode, targetData) {
+            if (gameState.teamUids.length === 0) { alert('Собери команду из уток в Штабе перед боем!'); return; }
+
             document.getElementById('levels-selection-card').classList.add('hidden');
             document.getElementById('battle-field-card').classList.remove('hidden');
 
-            let playerUnits = gameState.team.map((id, index) => ({
-                id: id, uid: 'p_' + index, name: monsterDatabase[id].name,
-                avatar: monsterDatabase[id].avatar, hp: monsterDatabase[id].hp,
-                maxHp: monsterDatabase[id].hp, skills: monsterDatabase[id].skills
-            }));
+            let playerUnits = gameState.teamUids.map((uid, index) => {
+                const invItem = gameState.inventory.find(i => i.uid === uid);
+                const base = monsterDatabase[invItem.id];
+                let hpBonus = base.hp + (invItem.lvl - 1) * 20;
+                let copiedSkills = base.skills.map(s => ({ n: s.n, d: s.d + (invItem.lvl * 2), cd: s.cd, curCd: 0 }));
+                return { uid: uid, name: base.name, avatar: base.avatar, hp: hpBonus, maxHp: hpBonus, skills: copiedSkills };
+            });
 
             let enemyUnits = [];
+            let gooseAvatars = [' Swans  Swan', '🦢', '🦤', '🦅', '🦉'];
 
             if (mode === 'level') {
-                document.getElementById('location-title').innerText = `Уровень ${targetData}`;
-                let enemyHp = 60 + (targetData * 26);
-                let enemyDmg = 10 + (targetData * 4);
-                let locIdx = Math.min(4, Math.floor((targetData - 1) / 10));
-                
-                let enemyAvatars = ['🦢', '🦤', '🦅', '🦉', '🦖'];
-                enemyUnits = [{
-                    uid: 'e_0', name: 'Злобный Гусь-Босс',
-                    avatar: enemyAvatars[locIdx],
-                    hp: enemyHp, maxHp: enemyHp, dmg: enemyDmg
-                }];
+                document.getElementById('location-title').innerText = `Сектор Пруда ${targetData}`;
+                let enemyHp = 40 + (targetData * 12);
+                let enemyDmg = 5 + (targetData * 2);
+                for(let i = 0; i < 3; i++) {
+                    enemyUnits.push({ uid: 'e_' + i, name: `Злой Гусь #${i+1}`, avatar: gooseAvatars[Math.floor(Math.random() * gooseAvatars.length)] || '🦢', hp: enemyHp, maxHp: enemyHp, dmg: enemyDmg });
+                }
             } else if (mode === 'friend') {
-                document.getElementById('location-title').innerText = `Дуэль против ${targetData}`;
-                let seed = parseInt(targetData.replace('ID-', '')) || 7777;
+                document.getElementById('location-title').innerText = `Дуэль с ${targetData}`;
+                let seed = parseInt(targetData.replace('ID-', '')) || 2222;
                 let keys = Object.keys(monsterDatabase);
-                
-                for(let i=0; i<3; i++) {
-                    let mId = keys[(seed + i) % keys.length];
-                    let m = monsterDatabase[mId];
-                    enemyUnits.push({
-                        uid: 'e_' + i, name: 'Утка Друга', avatar: m.avatar,
-                        hp: m.hp, maxHp: m.hp, dmg: Math.floor(m.skills[0].d * 0.95)
-                    });
+                for(let i = 0; i < 3; i++) {
+                    let m = monsterDatabase[keys[(seed + i) % keys.length]];
+                    enemyUnits.push({ uid: 'e_' + i, name: 'Утка-Защитник', avatar: m.avatar, hp: m.hp + 40, maxHp: m.hp + 40, dmg: Math.floor(m.skills[0].d * 0.9) });
                 }
             }
 
-            battleState = {
-                mode: mode, lvl: targetData, player: playerUnits, enemy: enemyUnits,
-                selectedPlayerUid: null, phase: 'enemy_turn'
-            };
-
+            battleState = { mode: mode, lvl: targetData, player: playerUnits, enemy: enemyUnits, selectedPlayerUid: null, phase: 'enemy_turn' };
             renderField();
             setTimeout(executeEnemyTurn, 1000);
         }
@@ -472,7 +558,7 @@
             battleState.player.forEach(u => {
                 const div = document.createElement('div'); div.id = u.uid;
                 div.className = `field-unit ${u.hp <= 0 ? 'dead' : ''} ${battleState.selectedPlayerUid === u.uid ? 'active-choice' : ''}`;
-                div.innerHTML = `<div class="field-avatar">${u.avatar}</div><div class="field-hp-bar-bg"><div class="field-hp-bar" style="width: ${(u.hp / u.maxHp) * 100}%"></div></div>`;
+                div.innerHTML = `<div class="field-avatar">${u.avatar}</div><div class="field-name">${u.name}</div><div class="field-hp-bar-bg"><div class="field-hp-bar" style="width: ${(u.hp / u.maxHp) * 100}%"></div></div>`;
                 if (battleState.phase === 'player_turn' && u.hp > 0) div.onclick = () => selectHeroForAttack(u.uid);
                 pSide.appendChild(div);
             });
@@ -481,14 +567,14 @@
             battleState.enemy.forEach(u => {
                 const div = document.createElement('div'); div.id = u.uid;
                 div.className = `field-unit enemy ${u.hp <= 0 ? 'dead' : ''}`;
-                div.innerHTML = `<div class="field-avatar">${u.avatar}</div><div class="field-hp-bar-bg"><div class="field-hp-bar" style="width: ${(u.hp / u.maxHp) * 100}%"></div></div>`;
+                div.innerHTML = `<div class="field-avatar">${u.avatar}</div><div class="field-name">${u.name}</div><div class="field-hp-bar-bg"><div class="field-hp-bar" style="width: ${(u.hp / u.maxHp) * 100}%"></div></div>`;
                 eSide.appendChild(div);
             });
         }
 
         function executeEnemyTurn() {
             if (!battleState) return;
-            document.getElementById('turn-indicator').innerText = 'Ход Врага...';
+            document.getElementById('turn-indicator').innerText = 'Атака соперника...';
             document.getElementById('turn-indicator').style.color = '#ff4757';
             document.getElementById('skills-control').classList.add('hidden');
 
@@ -498,39 +584,37 @@
             if (alivePlayers.length > 0 && aliveEnemies.length > 0) {
                 let attacker = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
                 let target = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
-                
-                target.hp -= attacker.dmg;
-                if (target.hp < 0) target.hp = 0;
-
+                target.hp -= attacker.dmg; if (target.hp < 0) target.hp = 0;
                 createDamagePop(target.uid, attacker.dmg);
                 renderField();
 
                 if (battleState.player.filter(u => u.hp > 0).length === 0) {
-                    alert('💀 Команда супер-уток пала! Открой новые капсулы.');
-                    closeBattleField();
-                    return;
+                    alert('💀 Твой супергеройский отряд уток разбит!'); closeBattleField(); return;
                 }
             }
 
+            battleState.player.forEach(u => { u.skills.forEach(s => { if (s.curCd > 0) s.curCd--; }); });
             battleState.phase = 'player_turn';
-            document.getElementById('turn-indicator').innerText = 'ТВОЙ ХОД! Жми на свою утку';
+            document.getElementById('turn-indicator').innerText = 'ТВОЙ ХОД! Жми на утку';
             document.getElementById('turn-indicator').style.color = '#00d2d3';
             renderField();
         }
 
         function selectHeroForAttack(uid) {
-            battleState.selectedPlayerUid = uid;
-            renderField();
+            battleState.selectedPlayerUid = uid; renderField();
             const unit = battleState.player.find(u => u.uid === uid);
-            document.getElementById('selected-hero-name').innerText = `Супер-Удары ${unit.avatar}:`;
+            document.getElementById('selected-hero-name').innerText = `Приемы ${unit.avatar}:`;
             
-            const skillsContainer = document.getElementById('skills-buttons');
-            skillsContainer.innerHTML = '';
+            const skillsContainer = document.getElementById('skills-buttons'); skillsContainer.innerHTML = '';
             unit.skills.forEach(skill => {
                 const b = document.createElement('button');
-                b.style.fontSize = '13px'; b.style.background = '#252f3d'; b.style.color = '#ffbc00'; b.style.boxShadow = '0 3px 0 #151c24';
-                b.innerHTML = `${skill.n}<br><small>${skill.d} DMG</small>`;
-                b.onclick = () => useSkill(unit, skill);
+                b.style.fontSize = '12px'; b.style.background = '#252f3d'; b.style.color = '#ffbc00';
+                if (skill.curCd > 0) {
+                    b.disabled = true; b.innerHTML = `${skill.n}<br><small style="color:#ff4757;">Кулдаун: ${skill.curCd} х.</small>`;
+                } else {
+                    b.innerHTML = `${skill.n}<br><small>Урон: ${skill.d}</small>`;
+                    b.onclick = () => useSkill(unit, skill);
+                }
                 skillsContainer.appendChild(b);
             });
             document.getElementById('skills-control').classList.remove('hidden');
@@ -541,46 +625,75 @@
             if (aliveEnemies.length === 0) return;
 
             let target = aliveEnemies[0];
-            target.hp -= skill.d;
-            if (target.hp < 0) target.hp = 0;
-
+            target.hp -= skill.d; if (target.hp < 0) target.hp = 0;
             createDamagePop(target.uid, skill.d);
+            
+            skill.curCd = skill.cd;
             battleState.selectedPlayerUid = null;
             document.getElementById('skills-control').classList.add('hidden');
             renderField();
 
             if (battleState.enemy.filter(u => u.hp > 0).length === 0) {
-                let prize = battleState.mode === 'level' ? (50 + (battleState.lvl * 25)) : 250; 
+                let prize = battleState.mode === 'level' ? (40 + (battleState.lvl * 15)) : 220;
                 gameState.coins += prize;
-                
-                if (battleState.mode === 'level' && battleState.lvl === gameState.currentLevel && gameState.currentLevel < 50) {
-                    gameState.currentLevel++;
-                }
-                alert(`🏆 ПОБЕДА УТОК!\nПолучено супер-монет: +${prize} 🪙`);
-                closeBattleField();
-                return;
+                if (battleState.mode === 'level' && battleState.lvl === gameState.currentLevel && gameState.currentLevel < 50) { gameState.currentLevel++; }
+                alert(`🏆 ПОБЕДА!\nПриз: +${prize} 🪙`);
+                closeBattleField(); return;
             }
 
             battleState.phase = 'enemy_turn';
-            setTimeout(executeEnemyTurn, 1200);
+            setTimeout(executeEnemyTurn, 1000);
         }
 
         function createDamagePop(unitUid, value) {
-            const el = document.getElementById(unitUid);
-            if (!el) return;
-            const pop = document.createElement('div');
-            pop.className = 'damage-pop'; pop.innerText = `-${value}`;
-            el.appendChild(pop);
-            setTimeout(() => pop.remove(), 800);
+            const el = document.getElementById(unitUid); if (!el) return;
+            const pop = document.createElement('div'); pop.className = 'damage-pop'; pop.innerText = `-${value}`;
+            el.appendChild(pop); setTimeout(() => pop.remove(), 800);
         }
 
         function closeBattleField() {
-            battleState = null;
-            saveGame();
-            updateUI();
+            battleState = null; saveGame(); updateUI();
             document.getElementById('battle-field-card').classList.add('hidden');
             document.getElementById('levels-selection-card').classList.remove('hidden');
             renderLevelBadges();
+        }
+
+        /* ТРЕЙД */
+        function setupTradeSelect() {
+            const select = document.getElementById('trade-duck-select'); select.innerHTML = '';
+            gameState.inventory.forEach(item => {
+                const base = monsterDatabase[item.id];
+                const opt = document.createElement('option'); opt.value = item.uid;
+                opt.innerText = `${base.avatar} ${base.name} (Ур. ${item.lvl})`;
+                select.appendChild(opt);
+            });
+        }
+
+        function executeTrade() {
+            const fId = document.getElementById('friend-id-input').value.trim();
+            if (!fId.startsWith('ID-') || fId.length < 5) { alert('Сначала введи ID друга!'); return; }
+            if (gameState.inventory.length <= 1) { alert('Нельзя обменять последнего бойца!'); return; }
+
+            const select = document.getElementById('trade-duck-select');
+            const targetUid = select.value;
+            if (!targetUid) return;
+
+            gameState.inventory = gameState.inventory.filter(i => i.uid !== targetUid);
+            gameState.teamUids = gameState.teamUids.filter(tUid => tUid !== targetUid);
+
+            let seed = parseInt(fId.replace('ID-', '')) || 555;
+            let keys = Object.keys(monsterDatabase);
+            let rolledId = keys[seed % keys.length];
+
+            gameState.inventory.push({ uid: 'u_tr_' + Date.now(), id: rolledId, lvl: 1, xp: 0 });
+            alert(`🔄 Успешный трейд!\nТы отдал своего бойца, а взамен получил: ${monsterDatabase[rolledId].avatar} ${monsterDatabase[rolledId].name}!`);
+            setupTradeSelect(); updateUI(); saveGame();
+        }
+
+        function startFriendBattle() {
+            const inputVal = document.getElementById('friend-id-input').value.trim();
+            if (!inputVal.startsWith('ID-') || inputVal.length < 5) { alert('Введи корректный ID друга!'); return; }
+            switchTab('levels'); startBattleCore('friend', inputVal);
         }
 
         window.onload = loadGame;
