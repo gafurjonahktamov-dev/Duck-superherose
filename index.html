@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Мир Монстров: Капсулы Редкости</title>
+    <title>Мир Монстров: Только Битвы</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -171,8 +171,7 @@
         <div id="tab-home" class="tab-content">
             <div class="card" style="text-align: center; margin-bottom: 15px;">
                 <h2>🏠 Твой Дом</h2>
-                <p>Здесь находятся все открытые тобой монстры.</p>
-                <button onclick="addCoins()" style="font-size: 15px; padding: 10px;">Собрать золото на базе (+1 🪙)</button>
+                <p>Здесь находятся все открытые тобой монстры. Зарабатывай золото в битвах, чтобы открывать капсулы!</p>
             </div>
             
             <div class="card">
@@ -183,7 +182,7 @@
 
         <div id="tab-shop" class="tab-content hidden">
             <div class="card">
-                <h2>🧪 Магазин Капсул</h2>
+                <h2>🛒 Магазин Капсул</h2>
                 <p style="font-size: 13px; color: #aaa; margin-bottom: 20px;">Испытай удачу! Из капсул выпадают случайные монстры их редкости.</p>
                 
                 <div id="capsules-market">
@@ -211,7 +210,7 @@
         <div id="tab-battle" class="tab-content hidden">
             <div class="card" style="text-align: center;">
                 <h2>⚔️ Битва с Друзьями</h2>
-                <p>Вызови друга на дуэль и забери его золото!</p>
+                <p>Вызови друга на дуэль и заберите его золото в случае победы!</p>
                 
                 <label for="fighter-select">Выбери своего бойца:</label>
                 <select id="fighter-select" style="width:100%; padding:10px; margin:10px 0; border-radius:5px; font-size:16px; background:#1e1e24; color:white; border:1px solid #555;"></select>
@@ -237,22 +236,16 @@
     </div>
 
     <script>
-        // БАЗА ДАННЫХ МОНСТРОВ ПО РЕДКОСТЯМ
         const monsterDatabase = {
-            // Редкие
             slime:    { name: 'Болотный Слизень', rarity: 'rare', hp: 90, dmg: 14, def: 3, ability: 'Вязкость (Уменьшает атаку врага)' },
             goblin:   { name: 'Гоблин-Вор',       rarity: 'rare', hp: 80, dmg: 18, def: 2, ability: 'Удар в спину (Крит урон)' },
-            // Сверхредкие
             dragon:   { name: 'Огненный Дракон',  rarity: 'super-rare', hp: 120, dmg: 25, def: 5, ability: 'Поджог (Бонус +15 урона)' },
             wizard:   { name: 'Ледяной Маг',      rarity: 'super-rare', hp: 110, dmg: 22, def: 4, ability: 'Заморозка (Пропуск хода врага)' },
-            // Эпические
             golem:    { name: 'Каменный Голем',   rarity: 'epic', hp: 200, dmg: 15, def: 18, ability: 'Каменный Щит (Блокирует урон)' },
             pekka:    { name: 'Стальной Рыцарь',  rarity: 'epic', hp: 160, dmg: 35, def: 10, ability: 'Оглушение (Критический удар x2)' },
-            // Легендарные
             phoenix:  { name: 'Золотой Феникс',   rarity: 'legendary', hp: 250, dmg: 40, def: 15, ability: 'Бессмертие (Исцеление в бою)' }
         };
 
-        // НАСТРОЙКИ КАПСУЛ
         const capsulesConfig = [
             { id: 'rare', name: 'Редкая Капсула', price: 30, cssClass: 'c-rare', textClass: 'rare', contains: ['slime', 'goblin'] },
             { id: 'super-rare', name: 'Сверхредкая Капсула', price: 70, cssClass: 'c-super', textClass: 'super-rare', contains: ['dragon', 'wizard'] },
@@ -260,7 +253,6 @@
             { id: 'legendary', name: 'ЛЕГЕНДАРНАЯ Капсула', price: 350, cssClass: 'c-legendary', textClass: 'legendary', contains: ['phoenix'] }
         ];
 
-        // Кампания NPC
         const npcLevels = [
             { id: 1, name: 'Дикий Кентавр', hp: 80, dmg: 12, def: 3, reward: 50 },
             { id: 2, name: 'Грозовой Огр', hp: 150, dmg: 24, def: 8, reward: 100 },
@@ -273,7 +265,7 @@
         };
 
         function loadGame() {
-            const savedData = localStorage.getItem('clash_monsters_capsules_v4');
+            const savedData = localStorage.getItem('clash_monsters_pure_battles');
             if (savedData) {
                 gameState = JSON.parse(savedData);
             }
@@ -282,13 +274,7 @@
         }
 
         function saveGame() {
-            localStorage.setItem('clash_monsters_capsules_v4', JSON.stringify(gameState));
-        }
-
-        function addCoins() {
-            gameState.coins += 1;
-            updateUI();
-            saveGame();
+            localStorage.setItem('clash_monsters_pure_battles', JSON.stringify(gameState));
         }
 
         function switchTab(tabName) {
@@ -308,7 +294,6 @@
             }
         }
 
-        // РЕНДЕР МАГАЗИНА КАПСУЛ
         function renderCapsules() {
             const container = document.getElementById('capsules-market');
             container.innerHTML = '';
@@ -329,14 +314,12 @@
             });
         }
 
-        // ПОКУПКА И ОТКРЫТИЕ КАПСУЛЫ
         function buyCapsule(capsuleId) {
             const config = capsulesConfig.find(c => c.id === capsuleId);
             
             if (gameState.coins >= config.price) {
                 gameState.coins -= config.price;
                 
-                // Выбираем случайного монстра из доступных в этой капсуле
                 const list = config.contains;
                 const randomId = list[Math.floor(Math.random() * list.length)];
                 const monster = monsterDatabase[randomId];
@@ -346,21 +329,19 @@
                     gameState.ownedIds.push(randomId);
                 }
 
-                // Красивое оповещение о выпадении
                 let rarityText = capsuleId.toUpperCase();
-                alert(`✨ ОТКРЫТИЕ КАПСУЛЫ! ✨\n\nТебе выпадает [${rarityText}] монстр:\n🎉 ${monster.name} 🎉\n\n${isNew ? 'Это новый монстр в коллекции!' : 'Он у тебя уже был, но теперь он готов к бою!'}`);
+                alert(`✨ ОТКРЫТИЕ КАПСУЛЫ! ✨\n\nВыпал монстр [${rarityText}]:\n🎉 ${monster.name} 🎉`);
                 
                 updateUI();
                 saveGame();
             } else {
-                alert('Недостаточно монет для покупки этой капсулы! Сражайся на уровнях, чтобы заработать.');
+                alert('Недостаточно монет! Сражайся на арене или уровнях.');
             }
         }
 
         function updateUI() {
             document.getElementById('coins-display').innerText = gameState.coins;
 
-            // Рендер коллекции дома
             const homeList = document.getElementById('home-monsters-list');
             if (gameState.ownedIds.length === 0) {
                 homeList.innerHTML = "У тебя пока пусто. Открой первую капсулу в вкладке <b>Магазин</b>!";
@@ -373,5 +354,116 @@
                     return `
                         <div class="home-monster-card">
                             <strong>${rLabel} ${m.name}</strong><br>
-                            <span
+                            <span class="stats-text">❤️ HP: ${m.hp} | ⚔️ Атака: ${m.dmg} | 🛡️ Защита: ${m.def}</span><br>
+                            <i style="font-size:12px; color:#aaa;">Навык: ${m.ability}</i>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
 
+        function setupSelectComponent(selectId) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '';
+            if (gameState.ownedIds.length === 0) {
+                const opt = document.createElement('option');
+                opt.text = "Сначала открой капсулу в магазине!";
+                select.appendChild(opt);
+            } else {
+                gameState.ownedIds.forEach(id => {
+                    const opt = document.createElement('option');
+                    opt.value = id;
+                    opt.text = monsterDatabase[id].name;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        function renderLevels() {
+            const div = document.getElementById('levels-list');
+            div.innerHTML = '';
+            npcLevels.forEach(npc => {
+                const block = document.createElement('div');
+                block.className = 'level-block';
+                const canFight = gameState.ownedIds.length > 0;
+                
+                block.innerHTML = `
+                    <div>
+                        <b style="color:#10ac84;">Уровень ${npc.id}</b><br>
+                        <span>Босс: <b>${npc.name}</b> (❤️${npc.hp})</span><br>
+                        <span style="font-size:12px; color:#f1c40f;">Награда: +${npc.reward} 🪙</span>
+                    </div>
+                    <button style="width:auto; padding:10px; font-size:14px; background:#10ac84; box-shadow:0 3px 0 #0f8f6d;" 
+                        onclick="startNpcFight(${npc.id})" ${!canFight ? 'disabled' : ''}>В Бой</button>
+                `;
+                div.appendChild(block);
+            });
+        }
+
+        function runBattleCore(playerData, enemyData, prizeMoney, logElementId, zoneElementId) {
+            document.getElementById(zoneElementId).classList.remove('hidden');
+            const log = document.getElementById(logElementId);
+            log.innerHTML = '⚡ Загрузка арены...<br>';
+
+            let player = { ...playerData };
+            let enemy = { ...enemyData };
+
+            log.innerHTML += `⚔️ <b>${player.name}</b> против <b>${enemy.name}</b>!<br><br>`;
+            let round = 1;
+
+            let timer = setInterval(() => {
+                log.innerHTML += `• [Раунд ${round}] •<br>`;
+                
+                let pDmg = Math.max(3, player.dmg - (enemy.def || 0));
+                enemy.hp -= pDmg;
+                log.innerHTML += `💥 ${player.name} наносит <b>${pDmg}</b> урона. У ${enemy.name} осталось ❤️${Math.max(0, enemy.hp)} HP.<br>`;
+
+                if (enemy.hp <= 0) {
+                    log.innerHTML += `<br>🏆 <b>ПОБЕДА!</b><br>💰 Заработано денег монстром: <b>+${prizeMoney} монет!</b><br>`;
+                    gameState.coins += prizeMoney;
+                    updateUI();
+                    saveGame();
+                    clearInterval(timer);
+                    return;
+                }
+
+                let eDmg = Math.max(3, enemy.dmg - (player.def || 0));
+                player.hp -= eDmg;
+                log.innerHTML += `🥊 ${enemy.name} бьет в ответ на <b>${eDmg}</b>. Твое здоровье: ❤️${Math.max(0, player.hp)} HP.<br><br>`;
+
+                if (player.hp <= 0) {
+                    log.innerHTML += `<br>💀 <b>ПОРАЖЕНИЕ!</b> Монстр проиграл бой.<br>`;
+                    clearInterval(timer);
+                    return;
+                }
+
+                round++;
+                log.scrollTop = log.scrollHeight;
+            }, 1000);
+        }
+
+        function startNpcFight(levelId) {
+            if (gameState.ownedIds.length === 0) return;
+            const myId = document.getElementById('level-fighter-select').value;
+            const player = monsterDatabase[myId];
+            const npc = npcLevels.find(n => n.id === levelId);
+            runBattleCore(player, npc, npc.reward, 'level-battle-log', 'level-battle-zone');
+        }
+
+        function startFriendFight() {
+            if (gameState.ownedIds.length === 0) return;
+            const myId = document.getElementById('fighter-select').value;
+            const player = monsterDatabase[myId];
+            
+            const keys = Object.keys(monsterDatabase);
+            const randomEnemyId = keys[Math.floor(Math.random() * keys.length)];
+            const enemy = { ...monsterDatabase[randomEnemyId], name: "Боец Друга (" + monsterDatabase[randomEnemyId].name + ")" };
+            
+            const prize = parseInt(document.getElementById('battle-bet').innerText);
+            runBattleCore(player, enemy, prize, 'battle-log', 'battle-zone');
+        }
+
+        window.onload = loadGame;
+    </script>
+</body>
+</html>
