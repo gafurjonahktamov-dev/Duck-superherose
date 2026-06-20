@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Моя Игра с Монстрами</title>
+    <title>Моя Игра: Битвы Монстров</title>
     <style>
-        /* Общие настройки для удобства на смартфонах */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -39,7 +38,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            padding-bottom: 100px; /* Место, чтобы кнопки снизу не перекрывали контент */
+            padding-bottom: 100px;
         }
 
         .card {
@@ -49,7 +48,7 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
-        /* Крупные, удобные кнопки */
+        /* Крупные удобные кнопки для телефона */
         button {
             background-color: #ff9f43;
             color: white;
@@ -74,17 +73,27 @@
             box-shadow: 0 4px 0 #341f97;
         }
 
-        /* Магазин монстров */
+        button:disabled {
+            background-color: #57606f;
+            box-shadow: 0 4px 0 #2f3542;
+            cursor: not-allowed;
+        }
+
         .monster-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 12px 0;
             border-bottom: 1px solid #3e3e4a;
         }
 
         .monster-item:last-child {
             border-bottom: none;
+        }
+
+        .stats-text {
+            font-size: 12px;
+            color: #ffdd59;
         }
 
         .price-tag {
@@ -94,11 +103,24 @@
 
         .discount {
             color: #2ecc71;
-            font-size: 14px;
-            margin-left: 5px;
+            font-size: 13px;
         }
 
-        /* Нижняя панель в стиле Clash Royale (расположение кнопок) */
+        /* Экран боя */
+        #battle-log {
+            background-color: #111;
+            border-radius: 8px;
+            padding: 10px;
+            height: 150px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 13px;
+            color: #00ff00;
+            margin-top: 10px;
+            text-align: left;
+        }
+
+        /* Панель меню Clash Royale */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -112,6 +134,7 @@
             padding: 10px 0;
             box-shadow: 0 -4px 10px rgba(0,0,0,0.4);
             border-top: 2px solid #3e3e4a;
+            z-index: 100;
         }
 
         .nav-btn {
@@ -120,174 +143,3 @@
             padding: 12px;
             font-size: 15px;
             width: 28%;
-        }
-    </style>
-</head>
-<body>
-
-    <header>
-        Монет: <span id="coins-display">0</span> 🪙
-    </header>
-
-    <div class="container">
-        
-        <div class="card" style="text-align: center;">
-            <h3>Заработай монеты</h3>
-            <button onclick="addCoins()">Кликнуть! (+1 монета)</button>
-        </div>
-
-        <div class="card">
-            <h3>Мои Монстры</h3>
-            <div id="my-monsters">Пока никого нет...</div>
-        </div>
-
-        <div class="card">
-            <h3>Магазин персонажей</h3>
-            <p style="font-size: 13px; color: #aaa;">Скидки обновляются при покупках или заходах!</p>
-            <div id="market-place">
-                </div>
-            <br>
-            <button class="secondary" onclick="refreshDiscounts()">Обновить скидки</button>
-        </div>
-
-    </div>
-
-    <div class="bottom-nav">
-        <button class="nav-btn" onclick="alert('Вы в Главном меню!')">Главная</button>
-        <button class="nav-btn" onclick="alert('Скоро: Битвы с друзьями!')">Битва</button>
-        <button class="nav-btn" onclick="resetGame()" style="background-color: #ee5253; box-shadow: 0 3px 0 #c82333;">Сброс</button>
-    </div>
-
-    <script>
-        // Исходные данные общих монстров
-        const baseMonsters = [
-            { id: 'dragon', name: 'Огненный Дракон', basePrice: 100 },
-            { id: 'golem', name: 'Каменный Голем', basePrice: 250 },
-            { id: 'pekka', name: 'Стальной Рыцарь', basePrice: 500 }
-        ];
-
-        // Переменные игры
-        let gameState = {
-            coins: 0,
-            ownedMonsters: []
-        };
-
-        // Текущие цены в магазине (с учетом скидок)
-        let marketPrices = {};
-
-        // 1. ЗАГРУЗКА ИГРЫ ИЗ ПАМЯТИ (localStorage)
-        function loadGame() {
-            const savedData = localStorage.getItem('monster_game_save');
-            if (savedData) {
-                gameState = JSON.parse(savedData);
-            }
-            generateDiscounts(); // Генерируем скидки при входе
-            updateUI();
-        }
-
-        // 2. СОХРАНЕНИЕ ИГРЫ
-        function saveGame() {
-            localStorage.setItem('monster_game_save', JSON.stringify(gameState));
-        }
-
-        // Клик для заработка монет
-        function addCoins() {
-            gameState.coins += 1;
-            updateUI();
-            saveGame();
-        }
-
-        // Генерация случайных скидок (от 0% до 40%)
-        function generateDiscounts() {
-            baseMonsters.forEach(monster => {
-                // Шанс 50%, что будет скидка
-                const hasDiscount = Math.random() > 0.5;
-                let discountPercent = 0;
-                if (hasDiscount) {
-                    discountPercent = Math.floor(Math.random() * 41); // от 0 до 40%
-                }
-                
-                const finalPrice = Math.round(monster.basePrice * (1 - discountPercent / 100));
-                marketPrices[monster.id] = {
-                    price: finalPrice,
-                    discount: discountPercent
-                };
-            });
-        }
-
-        function refreshDiscounts() {
-            generateDiscounts();
-            updateUI();
-        }
-
-        // Покупка конкретного монстра
-        function buyMonster(id, name) {
-            const currentPrice = marketPrices[id].price;
-
-            if (gameState.coins >= currentPrice) {
-                gameState.coins -= currentPrice;
-                gameState.ownedMonsters.push(name);
-                
-                alert(`Поздравляем! Ты купил монстра: ${name}!`);
-                
-                generateDiscounts(); // Обновляем скидки после покупки
-                updateUI();
-                saveGame(); // Сохраняем прогресс
-            } else {
-                alert('Недостаточно монет! Кликни еще немного.');
-            }
-        }
-
-        // Обновление всего интерфейса на экране
-        function updateUI() {
-            // Обновляем монеты
-            document.getElementById('coins-display').innerText = gameState.coins;
-
-            // Обновляем список купленных монстров
-            const monstersDiv = document.getElementById('my-monsters');
-            if (gameState.ownedMonsters.length === 0) {
-                monstersDiv.innerText = "Пока никого нет...";
-            } else {
-                monstersDiv.innerText = gameState.ownedMonsters.join(', ');
-            }
-
-            // Обновляем магазин
-            const marketDiv = document.getElementById('market-place');
-            marketDiv.innerHTML = ''; // Очищаем старый список
-
-            baseMonsters.forEach(monster => {
-                const info = marketPrices[monster.id];
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'monster-item';
-
-                let discountText = info.discount > 0 ? `<span class="discount">(-${info.discount}%)</span>` : '';
-
-                itemDiv.innerHTML = `
-                    <div>
-                        <strong>${monster.name}</strong><br>
-                        <span class="price-tag">${info.price} 🪙</span> ${discountText}
-                    </div>
-                    <button style="width: auto; padding: 8px 15px; font-size: 14px;" onclick="buyMonster('${monster.id}', '${monster.name}')">Купить</button>
-                `;
-                marketDiv.appendChild(itemDiv);
-            });
-        }
-
-        // Сброс игры (если хочется начать заново)
-        function resetGame() {
-            if (confirm('Ты точно хочешь удалить весь прогресс и начать заново?')) {
-                gameState = { coins: 0, ownedMonsters: [] };
-                generateDiscounts();
-                updateUI();
-                saveGame();
-            }
-        }
-
-        // Запуск игры при загрузке страницы
-        window.onload = loadGame;
-    </script>
-</body>
-</html>
-
-
-
