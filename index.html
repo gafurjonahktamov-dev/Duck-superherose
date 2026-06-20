@@ -1,299 +1,293 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>RPG Симулятор Уток-Супергероев</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Моя Игра с Монстрами</title>
+    <style>
+        /* Общие настройки для удобства на смартфонах */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e24;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        header {
+            background-color: #2a2a32;
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .container {
+            flex: 1;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 100px; /* Место, чтобы кнопки снизу не перекрывали контент */
+        }
+
+        .card {
+            background-color: #2a2a32;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        /* Крупные, удобные кнопки */
+        button {
+            background-color: #ff9f43;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.1s, background-color 0.2s;
+            box-shadow: 0 4px 0 #d35400;
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        button.secondary {
+            background-color: #5f27cd;
+            box-shadow: 0 4px 0 #341f97;
+        }
+
+        /* Магазин монстров */
+        .monster-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #3e3e4a;
+        }
+
+        .monster-item:last-child {
+            border-bottom: none;
+        }
+
+        .price-tag {
+            font-weight: bold;
+            color: #f1c40f;
+        }
+
+        .discount {
+            color: #2ecc71;
+            font-size: 14px;
+            margin-left: 5px;
+        }
+
+        /* Нижняя панель в стиле Clash Royale (расположение кнопок) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 500px;
+            background-color: #2a2a32;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.4);
+            border-top: 2px solid #3e3e4a;
+        }
+
+        .nav-btn {
+            background-color: #341f97;
+            box-shadow: 0 3px 0 #1e1250;
+            padding: 12px;
+            font-size: 15px;
+            width: 28%;
+        }
+    </style>
 </head>
-<body style="background-color: #121225; color: #ffffff; text-align: center; font-family: sans-serif; padding: 20px; padding-bottom: 80px; user-select: none;">
+<body>
 
-    <div style="margin-bottom: 20px;">
-        <div style="background: #25254d; padding: 10px 20px; display: inline-block; border-radius: 20px; font-size: 22px; font-weight: bold; color: #ffd700; border: 2px solid #ffd700; margin-right: 10px;">
-            💰 Монеты: <span id="balance">100</span>
-        </div>
-    </div>
+    <header>
+        Монет: <span id="coins-display">0</span> 🪙
+    </header>
 
-    <div id="tab-game">
-        <h1>⚔️ Битва с Злодеями и Капсулы Героев 📦</h1>
+    <div class="container">
         
-        <div style="background: #1c1c3a; padding: 20px; border-radius: 15px; margin: 10px auto; max-width: 500px; border: 1px solid #3d3d75;">
-            <h3>Город под защитой</h3>
-            <button onclick="fightNPC()" style="background: #ff4757; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">
-                💥 Победить суперзлодея (Получить монеты)
-            </button>
-            <p id="battle-log" style="color: #00ff7f; font-weight: bold; margin-top: 10px; min-height: 20px;"></p>
+        <div class="card" style="text-align: center;">
+            <h3>Заработай монеты</h3>
+            <button onclick="addCoins()">Кликнуть! (+1 монета)</button>
         </div>
 
-        <h3>🛒 Магазин секретных капсул</h3>
-        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 30px;">
-            <button onclick="openChest('rare', 50)" style="background: #54a0ff; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 140px;">🔷 Редкая<br><span style="color:#ffeaa7;">50 💰</span></button>
-            <button onclick="openChest('epic_rare', 120)" style="background: #a55eea; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 140px;">✨ Сверхредкая<br><span style="color:#ffeaa7;">120 💰</span></button>
-            <button onclick="openChest('epic', 300)" style="background: #ff4757; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 140px;">💎 Эпическая<br><span style="color:#ffeaa7;">300 💰</span></button>
-            <button onclick="openChest('legendary', 600)" style="background: #ffbd59; color: black; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 140px;">🌟 Легендарная<br><span style="color:#2f3542;">600 💰</span></button>
-            <button onclick="openChest('zero_chance', 1000)" style="background: linear-gradient(45deg, #ff007f, #7928ca); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 140px; box-shadow: 0 0 10px #ff007f;">💀 Нулевой Шанс<br><span style="color:#ffeaa7;">1000 💰</span></button>
+        <div class="card">
+            <h3>Мои Монстры</h3>
+            <div id="my-monsters">Пока никого нет...</div>
         </div>
 
-        <div id="reward-screen" style="margin-top: 20px; padding: 20px; display: inline-block; border-radius: 15px; background-color: #1a1a30; min-width: 320px; border: 2px solid #2e2e4e;">
-            <p id="reward-rarity" style="font-size: 14px; text-transform: uppercase; font-weight: bold; color: #57606f;">Здесь появится твоя уточка</p>
-            <h2 id="reward-name" style="font-size: 24px; margin: 10px 0;">???</h2>
-            <p style="font-size: 13px; color: #a0a0ba;">Отправлена в Главный Штаб!</p>
+        <div class="card">
+            <h3>Магазин персонажей</h3>
+            <p style="font-size: 13px; color: #aaa;">Скидки обновляются при покупках или заходах!</p>
+            <div id="market-place">
+                </div>
+            <br>
+            <button class="secondary" onclick="refreshDiscounts()">Обновить скидки</button>
         </div>
+
     </div>
 
-    <div id="tab-storage" style="display: none;">
-        <h1>🎒 Штаб твоих уток-супергероев</h1>
-        
-        <div style="background: #1c1c3a; padding: 15px; border-radius: 12px; max-width: 600px; margin: 0 auto 20px auto; border: 1px dashed #ffd700;">
-            <h3 style="margin: 5px 0;">🔓 Доступно слотов для героев: <span id="slots-count" style="color: #00ff7f;">1</span></h3>
-            <p style="font-size: 14px; color: #a0a0ba; margin: 5px 0;">Чтобы открыть следующий слот, улучши штаб 10 раз!</p>
-            <button onclick="upgradeSlot()" id="upgrade-slot-btn" style="background: #ffd700; color: black; border: none; padding: 10px 20px; font-size: 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                Прокачать штаб (Шаг: <span id="upgrade-step">0</span>/10) | Цена: <span id="upgrade-cost">10</span> 💰
-            </button>
-        </div>
-
-        <p style="color: #a0a0ba;">Тренируй своих супер-уток, чтобы повышать их уровень до 10!</p>
-        
-        <div id="storage-list" style="display: flex; flex-direction: column; gap: 15px; max-width: 600px; margin: 0 auto; text-align: left;">
-            <p style="text-align: center; color: #718093;">В штабе пусто. Активируй первую капсулу!</p>
-        </div>
-    </div>
-
-    <div style="margin-top: 40px; opacity: 0.4;">
-        <button onclick="toggleCheatMenu()" style="background: none; color: #ffd700; border: 1px solid #ffd700; padding: 5px 12px; font-size: 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">🎁 Код для подарков</button>
-        <div id="cheat-menu" style="display: none; margin-top: 10px; background: #222; padding: 15px; border-radius: 8px; display: inline-block;">
-            <input type="text" id="cheat-input" placeholder="Введите код здесь..." style="padding: 6px; font-size: 14px; width: 200px; text-align: center; border-radius: 4px; border: 1px solid #555;">
-            <button onclick="activateCheat()" style="padding: 6px 12px; font-size: 14px; background: #00ff7f; color: black; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; margin-left: 5px;">Активировать</button>
-        </div>
-    </div>
-
-    <div style="position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background-color: #1c1c3a; display: flex; justify-content: space-around; align-items: center; border-top: 2px solid #3d3d75; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); z-index: 999;">
-        <button onclick="switchTab('game')" style="background: none; border: none; color: #00ff7f; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center;">
-            <span>⚔️📦</span><span>Главная</span>
-        </button>
-        <button onclick="switchTab('storage')" style="background: none; border: none; color: #54a0ff; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center;">
-            <span>🎒👾</span><span>Штаб уток</span>
-        </button>
+    <div class="bottom-nav">
+        <button class="nav-btn" onclick="alert('Вы в Главном меню!')">Главная</button>
+        <button class="nav-btn" onclick="alert('Скоро: Битвы с друзьями!')">Битва</button>
+        <button class="nav-btn" onclick="resetGame()" style="background-color: #ee5253; box-shadow: 0 3px 0 #c82333;">Сброс</button>
     </div>
 
     <script>
-        let coins = 100; 
-        let myMonsters = []; 
-        
-        let maxSlots = 1;
-        let slotUpgradeSteps = 0;
-        let baseUpgradeCost = 10;
+        // Исходные данные общих монстров
+        const baseMonsters = [
+            { id: 'dragon', name: 'Огненный Дракон', basePrice: 100 },
+            { id: 'golem', name: 'Каменный Голем', basePrice: 250 },
+            { id: 'pekka', name: 'Стальной Рыцарь', basePrice: 500 }
+        ];
 
-        // Переделанные супергерои в виде резиновых уточек
-        const commonMonsters = ["🦆 Кряк Капитан (со щитом)", "🦆 Утка-Паучок (в трико)", "🦆 Железный Кряк (в броне)"];
-        const rareMonsters = ["🔱 Громовержец Кряксон", "🐺 Ночной Крякцарь (в плаще)", "⚡ Быстрый Свист"];
-        const superRareMonsters = ["🌀 Кряк Росомаха (с когтями)", "🤖 Кибер-Кряк", "🔮 Доктор Крякус"];
-        const epicMonsters = ["🔥 Зеленый Громила", "❄️ Леди Амазонка (с лассо)", "🌊 Морской Свистун"];
-        const legendaryMonsters = ["🌌 КРЯК ТИТАН КОСМОСА", "👤 СТРАЖ ВСЕЛЕННОЙ КРЯК"];
-        const godMonster = "👑 АЛЬФА КРЯК-УТКА СУДЬБЫ";
+        // Переменные игры
+        let gameState = {
+            coins: 0,
+            ownedMonsters: []
+        };
 
-        document.getElementById("cheat-menu").style.display = "none";
+        // Текущие цены в магазине (с учетом скидок)
+        let marketPrices = {};
 
-        function switchTab(tab) {
-            if (tab === 'game') {
-                document.getElementById('tab-game').style.display = 'block';
-                document.getElementById('tab-storage').style.display = 'none';
+        // 1. ЗАГРУЗКА ИГРЫ ИЗ ПАМЯТИ (localStorage)
+        function loadGame() {
+            const savedData = localStorage.getItem('monster_game_save');
+            if (savedData) {
+                gameState = JSON.parse(savedData);
+            }
+            generateDiscounts(); // Генерируем скидки при входе
+            updateUI();
+        }
+
+        // 2. СОХРАНЕНИЕ ИГРЫ
+        function saveGame() {
+            localStorage.setItem('monster_game_save', JSON.stringify(gameState));
+        }
+
+        // Клик для заработка монет
+        function addCoins() {
+            gameState.coins += 1;
+            updateUI();
+            saveGame();
+        }
+
+        // Генерация случайных скидок (от 0% до 40%)
+        function generateDiscounts() {
+            baseMonsters.forEach(monster => {
+                // Шанс 50%, что будет скидка
+                const hasDiscount = Math.random() > 0.5;
+                let discountPercent = 0;
+                if (hasDiscount) {
+                    discountPercent = Math.floor(Math.random() * 41); // от 0 до 40%
+                }
+                
+                const finalPrice = Math.round(monster.basePrice * (1 - discountPercent / 100));
+                marketPrices[monster.id] = {
+                    price: finalPrice,
+                    discount: discountPercent
+                };
+            });
+        }
+
+        function refreshDiscounts() {
+            generateDiscounts();
+            updateUI();
+        }
+
+        // Покупка конкретного монстра
+        function buyMonster(id, name) {
+            const currentPrice = marketPrices[id].price;
+
+            if (gameState.coins >= currentPrice) {
+                gameState.coins -= currentPrice;
+                gameState.ownedMonsters.push(name);
+                
+                alert(`Поздравляем! Ты купил монстра: ${name}!`);
+                
+                generateDiscounts(); // Обновляем скидки после покупки
+                updateUI();
+                saveGame(); // Сохраняем прогресс
             } else {
-                document.getElementById('tab-game').style.display = 'none';
-                document.getElementById('tab-storage').style.display = 'block';
-                renderStorage(); 
+                alert('Недостаточно монет! Кликни еще немного.');
             }
         }
 
-        function fightNPC() {
-            let loot = Math.floor(Math.random() * 21) + 10;
-            coins += loot;
-            document.getElementById("balance").innerText = coins;
-            document.getElementById("battle-log").innerText = `⚔️ Вы одолели коварного злодея и спасли жителей! Получено +${loot} монет!`;
-        }
+        // Обновление всего интерфейса на экране
+        function updateUI() {
+            // Обновляем монеты
+            document.getElementById('coins-display').innerText = gameState.coins;
 
-        function openChest(type, price) {
-            if (myMonsters.length >= maxSlots) {
-                alert(`Лимит штаба превышен (${myMonsters.length}/${maxSlots})! Прокачай штаб во вкладке Улучшений или отправь лишнюю утку в отставку.`);
-                return;
+            // Обновляем список купленных монстров
+            const monstersDiv = document.getElementById('my-monsters');
+            if (gameState.ownedMonsters.length === 0) {
+                monstersDiv.innerText = "Пока никого нет...";
+            } else {
+                monstersDiv.innerText = gameState.ownedMonsters.join(', ');
             }
 
-            if (coins < price) {
-                alert("Недостаточно монет! Сражайся со злодеями!");
-                return;
-            }
-            coins -= price;
-            document.getElementById("balance").innerText = coins;
+            // Обновляем магазин
+            const marketDiv = document.getElementById('market-place');
+            marketDiv.innerHTML = ''; // Очищаем старый список
 
-            let rand = Math.random() * 100;
-            let name = ""; let rarityText = ""; let color = ""; let sellValue = 25;
+            baseMonsters.forEach(monster => {
+                const info = marketPrices[monster.id];
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'monster-item';
 
-            if (type === 'rare') {
-                if (rand < 75) { name = commonMonsters[Math.floor(Math.random() * commonMonsters.length)]; rarityText = "Обычная уточка"; color = "#718093"; sellValue = 25; }
-                else { name = rareMonsters[Math.floor(Math.random() * rareMonsters.length)]; rarityText = "🔷 РЕДКАЯ УТКА"; color = "#54a0ff"; sellValue = 60; }
-            }
-            else if (type === 'epic_rare') {
-                if (rand < 50) { name = rareMonsters[Math.floor(Math.random() * rareMonsters.length)]; rarityText = "🔷 РЕДКАЯ УТКА"; color = "#54a0ff"; sellValue = 60; }
-                else if (rand < 90) { name = superRareMonsters[Math.floor(Math.random() * superRareMonsters.length)]; rarityText = "✨ СВЕРХРЕДКАЯ УТКА"; color = "#a55eea"; sellValue = 150; }
-                else { name = epicMonsters[Math.floor(Math.random() * epicMonsters.length)]; rarityText = "💎 ЭПИЧЕСКАЯ УТКА"; color = "#ff4757"; sellValue = 300; }
-            }
-            else if (type === 'epic') {
-                if (rand < 40) { name = rareMonsters[Math.floor(Math.random() * rareMonsters.length)]; rarityText = "🔷 РЕДКАЯ УТКА"; color = "#54a0ff"; sellValue = 60; }
-                else if (rand < 85) { name = superRareMonsters[Math.floor(Math.random() * superRareMonsters.length)]; rarityText = "✨ СВЕРХРЕДКАЯ УТКА"; color = "#a55eea"; sellValue = 150; }
-                else { name = epicMonsters[Math.floor(Math.random() * epicMonsters.length)]; rarityText = "💎 ЭПИЧЕСКАЯ УТКА"; color = "#ff4757"; sellValue = 300; }
-            }
-            else if (type === 'legendary') {
-                if (rand < 50) { name = superRareMonsters[Math.floor(Math.random() * superRareMonsters.length)]; rarityText = "✨ СВЕРХРЕДКАЯ УТКА"; color = "#a55eea"; sellValue = 150; }
-                else if (rand < 90) { name = epicMonsters[Math.floor(Math.random() * epicMonsters.length)]; rarityText = "💎 ЭПИЧЕСКАЯ УТКА"; color = "#ff4757"; sellValue = 300; }
-                else { name = legendaryMonsters[Math.floor(Math.random() * legendaryMonsters.length)]; rarityText = "🌟 ЛЕГЕНДАРНЫЙ ГЕРОЙ"; color = "#ffbd59"; sellValue = 500; }
-            }
-            else if (type === 'zero_chance') {
-                if (rand <= 0.5) { name = godMonster; rarityText = "🚨 БОЖЕСТВЕННАЯ УТКА (0.5%)"; color = "#ff007f"; sellValue = 1000; }
-                else if (rand < 60) { name = epicMonsters[Math.floor(Math.random() * epicMonsters.length)]; rarityText = "💎 ЭПИЧЕСКАЯ УТКА"; color = "#ff4757"; sellValue = 300; }
-                else { name = legendaryMonsters[Math.floor(Math.random() * legendaryMonsters.length)]; rarityText = "🌟 ЛЕГЕНДАРНЫЙ ГЕРОЙ"; color = "#ffbd59"; sellValue = 500; }
-            }
+                let discountText = info.discount > 0 ? `<span class="discount">(-${info.discount}%)</span>` : '';
 
-            myMonsters.push({
-                id: Date.now() + Math.random(),
-                name: name,
-                rarity: rarityText,
-                color: color,
-                level: 1,
-                xp: 0,
-                worth: sellValue
-            });
-
-            document.getElementById("reward-rarity").innerText = rarityText;
-            document.getElementById("reward-rarity").style.color = color;
-            document.getElementById("reward-name").innerText = name;
-            document.getElementById("reward-name").style.color = color;
-            document.getElementById("reward-screen").style.borderColor = color;
-        }
-
-        function getAbility(level) {
-            if (level >= 10) return "⚡ СУПЕР-УЛЬТРА КРЯК АННИГИЛЯЦИЯ (МАКС)";
-            if (level >= 8) return "❤️ Исцеляющее Кряканье";
-            if (level >= 5) return "🛡️ Резиновый Энергетический Барьер";
-            if (level >= 3) return "💥 Мощный Шлепок Ластами";
-            return "⚔️ Базовый бросок пузырями";
-        }
-
-        function renderStorage() {
-            document.getElementById("slots-count").innerText = maxSlots;
-            document.getElementById("upgrade-step").innerText = slotUpgradeSteps;
-            document.getElementById("upgrade-cost").innerText = baseUpgradeCost;
-
-            let container = document.getElementById("storage-list");
-            if (myMonsters.length === 0) {
-                container.innerHTML = `<p style="text-align: center; color: #718093;">В штабе пусто. Активируй первую капсулу!</p>`;
-                return;
-            }
-
-            container.innerHTML = "";
-            myMonsters.forEach(m => {
-                let xpNeeded = m.level * 3;
-                let playBtnText = m.level >= 10 ? "МАКС УРОВЕНЬ" : `🎮 Тренировать (${m.xp}/${xpNeeded})`;
-                let disabledAttr = m.level >= 10 ? "disabled style='background:#57606f; color:#aaa; cursor:not-allowed; border:none; padding:6px 12px; border-radius:5px; font-weight:bold;'" : "style='background:#00ff7f; color:black; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; cursor:pointer;'";
-
-                let sellDisabled = myMonsters.length <= 1 ? "disabled style='background:#57606f; color:#aaa; cursor:not-allowed; border:none; padding:6px 12px; border-radius:5px; font-weight:bold;'" : "style='background:#ff4757; color:white; border:none; padding:6px 12px; border-radius:5px; font-weight:bold; cursor:pointer;'";
-
-                container.innerHTML += `
-                    <div style="background: #1c1c3a; padding: 15px; border-radius: 10px; border-left: 5px solid ${m.color}; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                        <div>
-                            <span style="color: ${m.color}; font-size: 12px; font-weight: bold; letter-spacing:1px;">${m.rarity}</span>
-                            <h3 style="margin: 5px 0; color: ${m.color}">${m.name}</h3>
-                            <p style="margin: 2px 0; font-size: 14px;">⭐ Уровень: <b style="color:#ffd700">${m.level}/10</b></p>
-                            <p style="margin: 2px 0; font-size: 13px; color: #00ff7f;">✨ Сила: ${getAbility(m.level)}</p>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 5px;">
-                            <button onclick="playWithMonster(${m.id})" ${disabledAttr}>${playBtnText}</button>
-                            <button onclick="sellMonster(${m.id})" ${sellDisabled}>💰 Уволить (+${m.worth})</button>
-                        </div>
+                itemDiv.innerHTML = `
+                    <div>
+                        <strong>${monster.name}</strong><br>
+                        <span class="price-tag">${info.price} 🪙</span> ${discountText}
                     </div>
+                    <button style="width: auto; padding: 8px 15px; font-size: 14px;" onclick="buyMonster('${monster.id}', '${monster.name}')">Купить</button>
                 `;
+                marketDiv.appendChild(itemDiv);
             });
         }
 
-        function playWithMonster(id) {
-            let monster = myMonsters.find(m => m.id === id);
-            if (!monster || monster.level >= 10) return;
-
-            monster.xp++;
-            let xpNeeded = monster.level * 3;
-
-            if (monster.xp >= xpNeeded) {
-                monster.level++;
-                monster.xp = 0;
-                alert(`🎉 Ура! Твоя уточка [${monster.name}] повысила силу до ${monster.level} уровня! Открыта новая суперспособность!`);
-            }
-
-            renderStorage(); 
-        }
-
-        function sellMonster(id) {
-            if (myMonsters.length <= 1) {
-                alert("Нельзя распустить последнюю уточку из штаба!");
-                return;
-            }
-
-            let index = myMonsters.findIndex(m => m.id === id);
-            if (index !== -1) {
-                let reward = myMonsters[index].worth;
-                coins += reward;
-                document.getElementById("balance").innerText = coins;
-                myMonsters.splice(index, 1); 
-                renderStorage();
+        // Сброс игры (если хочется начать заново)
+        function resetGame() {
+            if (confirm('Ты точно хочешь удалить весь прогресс и начать заново?')) {
+                gameState = { coins: 0, ownedMonsters: [] };
+                generateDiscounts();
+                updateUI();
+                saveGame();
             }
         }
 
-        function upgradeSlot() {
-            if (coins < baseUpgradeCost) {
-                alert("Недостаточно монет для расширения штаба!");
-                return;
-            }
-
-            coins -= baseUpgradeCost;
-            document.getElementById("balance").innerText = coins;
-            slotUpgradeSteps++;
-
-            if (slotUpgradeSteps >= 10) {
-                maxSlots++; 
-                slotUpgradeSteps = 0; 
-                baseUpgradeCost += 20; 
-                alert(`🔓 Поздравляем! Ты расширил штаб! Теперь можно нанять до ${maxSlots} уточек!`);
-            }
-
-            renderStorage();
-        }
-
-        function toggleCheatMenu() {
-            let menu = document.getElementById("cheat-menu");
-            menu.style.display = menu.style.display === "none" ? "block" : "none";
-        }
-
-        function activateCheat() {
-            let code = document.getElementById("cheat-input").value.trim().toLowerCase();
-            
-            if (code === "67") {
-                coins += 999999;
-                document.getElementById("balance").innerText = coins;
-                alert("👑 Секретный VIP-код сработал! Получено 999,999 монет!");
-                document.getElementById("cheat-menu").style.display = "none";
-                document.getElementById("cheat-input").value = "";
-            } 
-            else if (code === "спасибо, что вы зашли") {
-                coins += 200;
-                document.getElementById("balance").innerText = coins;
-                alert("🎁 Промокод активирован! Спасибо за игру, вам начислено +200 монет! 💰");
-                document.getElementById("cheat-menu").style.display = "none";
-                document.getElementById("cheat-input").value = "";
-            } 
-            else {
-                alert("❌ Такой код для подарков не существует!");
-            }
-            
-            if (document.getElementById('tab-storage').style.display === 'block') {
-                renderStorage();
-            }
-        }
+        // Запуск игры при загрузке страницы
+        window.onload = loadGame;
     </script>
 </body>
 </html>
+
+
+
